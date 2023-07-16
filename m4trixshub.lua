@@ -8,7 +8,7 @@ local colors = {
     ElementColor = Color3.fromRGB(77, 77, 77)
 }
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("m4trix's Hub", colors)
+local Window = Library.CreateLib("m4trix Hub", colors)
 
 -- SEARCH FOR ALL EGGS
 local worldsParent = game.Workspace.Worlds -- Replace 'Workspace' with the appropriate parent where your "Worlds" parent is located
