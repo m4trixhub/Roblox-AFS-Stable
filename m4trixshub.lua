@@ -60,17 +60,26 @@ function multiOpen()
     end)
 end
 
---
+function antiAFK()
+    spawn(function()
+        while getgenv().antiAFK do
+			for _, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
+					v:Disable()
+					wait(60)
+			end
+        end
+    end)
+end
 
 
+--- MAIN
 local Tab = Window:NewTab("MAIN")
--- OPEN STARS
+-- Choose Egg
 local Section = Tab:NewSection("Open Stars")
 Section:NewDropdown("Select Egg", "Select Egg", eggs, function(currentState)
     getgenv().eggSelected = currentState -- This will print the selected egg when chosen from the dropdown
 end)
-
-
+-- Multi Open
 getgenv().multiOpen = false
 Section:NewToggle("Multi Open", "Multi Open", function(state)
 	getgenv().multiOpen = state
@@ -80,7 +89,7 @@ Section:NewToggle("Multi Open", "Multi Open", function(state)
         print("Toggle Off")
     end
 end)
-
+-- Max Open
 getgenv().maxOpen = false
 Section:NewToggle("Max Open", "Max Open", function(state)
 	getgenv().maxOpen = state
@@ -91,4 +100,16 @@ Section:NewToggle("Max Open", "Max Open", function(state)
     end
 end)
 
-
+--- MISC
+local Tab = Window:NewTab("MISC")
+local Section = Tab:NewSection("Misc")
+-- Anti-AFK
+getgenv().antiAFK = false
+Section:NewToggle("Anti-AFK", "Anti-AFK", function(state)
+	getgenv().antiAFK = state
+    if state then
+        antiAFK()
+    else
+        print("Toggle Off")
+    end
+end)
