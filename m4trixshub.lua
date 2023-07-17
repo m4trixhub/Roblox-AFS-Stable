@@ -71,6 +71,25 @@ function antiAFK()
     end)
 end
 
+function magnetGamepass()
+    spawn(function()
+        while getgenv().magnetGamepass do
+            wait(1)
+            local workspace = game:GetService("Workspace")
+            local player = game.Players.LocalPlayer
+            local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            local effects = workspace:FindFirstChild("Effects")
+            if effects then
+                for _, effect in ipairs(effects:GetChildren()) do
+                    pcall(function()
+                        effect.Base.CFrame = humanoidRootPart.CFrame
+                    end)
+                end
+            end
+    	end
+	end)
+end
+
 
 --- MAIN
 local Tab = Window:NewTab("MAIN")
@@ -99,6 +118,22 @@ Section:NewToggle("Max Open", "Max Open", function(state)
         print("Toggle Off")
     end
 end)
+
+--- GAMEPASSES
+local Tab = Window:NewTab("GAMEPASS")
+local Section = Tab:NewSection("Gamepass")
+-- Magnet
+getgenv().magnetGamepass = false
+Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
+	getgenv().magnetGamepass = state
+    if state then
+        magnetGamepass()
+    else
+        print("Toggle Off")
+    end
+end)
+
+
 
 --- MISC
 local Tab = Window:NewTab("MISC")
