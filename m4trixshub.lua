@@ -71,9 +71,9 @@ function antiAFK()
     end)
 end
 
-function magnetGamepass()
+function magnetGP()
     spawn(function()
-        while getgenv().magnetGamepass do
+        while getgenv().magnetGP do
             wait(1)
             local workspace = game:GetService("Workspace")
             local player = game.Players.LocalPlayer
@@ -90,6 +90,40 @@ function magnetGamepass()
 	end)
 end
 
+function autoClickGP()
+	spawn(function()
+		while getgenv().autoClickGP do
+            wait(0.025)
+            game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("ClickerDamage"):FireServer()
+		end
+	end)
+end
+
+function sprintGP()
+	spawn(function()
+		while getgenv().sprintGP do
+            wait(0.25)
+            if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 30 then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 30
+            end
+		end
+	end)
+end
+
+function autoAttackGP()
+	spawn(function()
+		while getgenv().autoAttackGP do
+            local currentWorld = game:GetService("Players").LocalPlayer.World.Value
+            local enemies = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
+            for _, enemy in ipairs(enemies) do
+                wait(2)
+                pcall(function()
+                    print(enemy)
+                end)
+            end
+		end
+	end)
+end
 
 --- MAIN
 local Tab = Window:NewTab("MAIN")
@@ -123,17 +157,45 @@ end)
 local Tab = Window:NewTab("GAMEPASS")
 local Section = Tab:NewSection("Gamepass")
 -- Magnet
-getgenv().magnetGamepass = false
+getgenv().magnetGP = false
 Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
-	getgenv().magnetGamepass = state
+	getgenv().magnetGP = state
     if state then
-        magnetGamepass()
+        magnetGP()
     else
         print("Toggle Off")
     end
 end)
-
-
+-- AutoClick
+getgenv().autoClickGP = false
+Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
+	getgenv().autoClickGP = state
+    if state then
+        autoClickGP()
+    else
+        print("Toggle Off")
+    end
+end)
+-- AutoAttack
+getgenv().autoAttackGP = false
+Section:NewToggle("Auto Attack Gamepass", "Auto Attack Gamepass", function(state)
+	getgenv().autoAttackGP = state
+    if state then
+        autoAttackGP()
+    else
+        print("Toggle Off")
+    end
+end)
+-- Sprint
+getgenv().sprintGP = false
+Section:NewToggle("Sprint Gamepass", "Sprint Gamepass", function(state)
+	getgenv().sprintGP = state
+    if state then
+        sprintGP()
+    else
+        print("Toggle Off")
+    end
+end)
 
 --- MISC
 local Tab = Window:NewTab("MISC")
