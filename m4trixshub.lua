@@ -63,11 +63,11 @@ end
 function antiAFK()
     spawn(function()
         while getgenv().antiAFK do
-			for _, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
-					v:Disable()
-					wait(60)
-			end
-        end
+		for _, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
+			wait(60)
+			v:Disable()
+		end
+	end
     end)
 end
 
