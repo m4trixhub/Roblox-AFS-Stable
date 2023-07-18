@@ -178,7 +178,7 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
 end)
 -- AutoAttack
 getgenv().autoAttackGP = false
-Section:NewToggle("Auto Attack Gamepass", "Auto Attack Gamepass", function(state)
+Section:NewToggle("Auto Attack Gamepass (NOT WORKING)", "Auto Attack Gamepass (NOT WORKING)", function(state)
 	getgenv().autoAttackGP = state
     if state then
         autoAttackGP()
