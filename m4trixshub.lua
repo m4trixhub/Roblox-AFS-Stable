@@ -102,10 +102,10 @@ end
 function sprintGP()
 	spawn(function()
 		while getgenv().sprintGP do
-            wait(0.25)
-            if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 30 then
-                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 30
-            end
+			wait(0.25)
+			if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 45 then
+				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 45
+			end
 		end
 	end)
 end
@@ -113,14 +113,23 @@ end
 function autoAttackGP()
 	spawn(function()
 		while getgenv().autoAttackGP do
-            local currentWorld = game:GetService("Players").LocalPlayer.World.Value
-            local enemies = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
-            for _, enemy in ipairs(enemies) do
-                wait(2)
-                pcall(function()
-                    print(enemy)
-                end)
-            end
+			local currentWorld = game:GetService("Players").LocalPlayer.World.Value
+			local enemies = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
+			for _, enemy in ipairs(enemies) do
+				wait(2)
+				pcall(function()
+					print(enemy)
+				end)
+			end
+		end
+	end)
+end
+
+function dailySpin()
+	spawn(function()
+		while getgenv().dailySpin do
+	            wait(10)
+	            game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("DailySpin"):FireServer()
 		end
 	end)
 end
@@ -206,6 +215,16 @@ Section:NewToggle("Anti-AFK", "Anti-AFK", function(state)
 	getgenv().antiAFK = state
     if state then
         antiAFK()
+    else
+        print("Toggle Off")
+    end
+end)
+-- Daily Spin
+getgenv().dailySpin = false
+Section:NewToggle("Daily Spin", "Daily Spin", function(state)
+	getgenv().dailySpin = state
+    if state then
+        dailySpin()
     else
         print("Toggle Off")
     end
