@@ -102,28 +102,72 @@ end
 function sprintGP()
 	spawn(function()
 		while getgenv().sprintGP do
-			wait(0.25)
-			if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 45 then
-				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 45
+            wait(0.25)
+            if game.Players.LocalPlayer.Character.Humanoid.WalkSpeed < 30 then
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 30
+            end
+		end
+	end)
+end
+
+
+function autoAttackGP()
+    spawn(function()
+        while getgenv().autoAttackGP do
+			local currentWorld = game:GetService("Players").LocalPlayer.World.Value
+			local enemyList = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
+			local playerBody = game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+			local distance
+			local closestEnemy
+			
+			for _, enemy in ipairs(enemyList) do
+				wait()
+				distance = ((enemy.HumanoidRootPart.Position or enemy.PrimaryPart.Position) - playerBody.Position).magnitude
+				if distance < 20 then
+					closestEnemy = enemy
+					break
+				end
+			end
+			while closestEnemy and (distance < 20) do
+				distance = ((closestEnemy.HumanoidRootPart.Position or closestEnemy.PrimaryPart.Position) - playerBody.Position).magnitude
+				contador = 0
+				if contador == 0 then
+					print("Sending pets to attack", closestEnemy.Name)
+				end
+				
+				local myPets = game:GetService("Players").LocalPlayer.Pets:GetChildren()
+
+				for _, pet in ipairs(myPets) do
+					if tostring(workspace:WaitForChild("Pets"):WaitForChild(pet.Name).Data.Owner.Value) == game:GetService("Players").LocalPlayer.Name then
+						print('tentou atacar!')
+						contador = contador + 1
+						local args = {
+							[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
+							[2] = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies"):WaitForChild(closestEnemy.Name),
+							[3] = contador
+						}
+						game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+						game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = args[2]
+					end
+				end
+				if not getgenv().autoAttackGP then
+					for _, pet in ipairs(myPets) do
+						if tostring(workspace:WaitForChild("Pets"):WaitForChild(pet.Name).Data.Owner.Value) == game:GetService("Players").LocalPlayer.Name then
+							local args = {
+								[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
+							}
+							game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+							game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = nill
+						end
+					end
+					break
+				end
+				wait() -- Adjust the delay before the next iteration
 			end
 		end
 	end)
 end
 
-function autoAttackGP()
-	spawn(function()
-		while getgenv().autoAttackGP do
-			local currentWorld = game:GetService("Players").LocalPlayer.World.Value
-			local enemies = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
-			for _, enemy in ipairs(enemies) do
-				wait(2)
-				pcall(function()
-					print(enemy)
-				end)
-			end
-		end
-	end)
-end
 
 function dailySpin()
 	spawn(function()
@@ -133,6 +177,7 @@ function dailySpin()
 		end
 	end)
 end
+
 
 --- MAIN
 local Tab = Window:NewTab("MAIN")
@@ -187,7 +232,7 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
 end)
 -- AutoAttack
 getgenv().autoAttackGP = false
-Section:NewToggle("Auto Attack Gamepass (NOT WORKING)", "Auto Attack Gamepass (NOT WORKING)", function(state)
+Section:NewToggle("Auto Attack Gamepass", "Auto Attack Gamepass", function(state)
 	getgenv().autoAttackGP = state
     if state then
         autoAttackGP()
