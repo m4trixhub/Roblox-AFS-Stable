@@ -123,12 +123,12 @@ function autoAttackGP()
 			for _, enemy in ipairs(enemyList) do
 				wait()
 				distance = ((enemy.HumanoidRootPart.Position or enemy.PrimaryPart.Position) - playerBody.Position).magnitude
-				if distance < 20 then
+				if distance < 35 then
 					closestEnemy = enemy
 					break
 				end
 			end
-			while closestEnemy and (distance < 20) do
+			while closestEnemy and (distance < 35) do
 				distance = ((closestEnemy.HumanoidRootPart.Position or closestEnemy.PrimaryPart.Position) - playerBody.Position).magnitude
 				contador = 0
 				if contador == 0 then
