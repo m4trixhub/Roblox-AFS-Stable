@@ -149,6 +149,7 @@ function autoAttackGP()
 						game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
 						game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = args[2]
 					end
+					wait()
 				end
 				if not getgenv().autoAttackGP then
 					for _, pet in ipairs(myPets) do
