@@ -35,6 +35,10 @@ local eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 
 -- Now 'itemsWithKeyword' is a list (table) containing the names of the items with the keyword "Egg" but excluding "JJBAStoneOceanEgg".
 
+local player = game.Players.LocalPlayer
+local savedPosition = nil
+local savedWorld = nil
+
 -- FUNCTIONS
 function maxOpen()
 	spawn(function()
@@ -115,20 +119,21 @@ function autoAttackGP()
     spawn(function()
         while getgenv().autoAttackGP do
 			local currentWorld = game:GetService("Players").LocalPlayer.World.Value
-			local enemyList = game:GetService("Workspace").Worlds[currentWorld].Enemies:GetChildren()
+			local enemies = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies")
 			local playerBody = game:GetService("Players").LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+			local playerName = game:GetService("Players").LocalPlayer.Name
 			local distance
 			local closestEnemy
 			
-			for _, enemy in ipairs(enemyList) do
+			for _, enemy in ipairs(enemies:GetChildren()) do
 				wait()
 				distance = ((enemy.HumanoidRootPart.Position or enemy.PrimaryPart.Position) - playerBody.Position).magnitude
-				if distance < 35 then
+				if distance < 20 then
 					closestEnemy = enemy
 					break
 				end
 			end
-			while closestEnemy and (distance < 35) do
+			while closestEnemy and (distance < 20) do
 				distance = ((closestEnemy.HumanoidRootPart.Position or closestEnemy.PrimaryPart.Position) - playerBody.Position).magnitude
 				contador = 0
 				if contador == 0 then
@@ -136,30 +141,49 @@ function autoAttackGP()
 				end
 				
 				local myPets = game:GetService("Players").LocalPlayer.Pets:GetChildren()
+				local allPets = workspace:WaitForChild("Pets"):GetChildren()
 
-				for _, pet in ipairs(myPets) do
-					if tostring(workspace:WaitForChild("Pets"):WaitForChild(pet.Name).Data.Owner.Value) == game:GetService("Players").LocalPlayer.Name then
-						print('tentou atacar!')
-						contador = contador + 1
-						local args = {
-							[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
-							[2] = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies"):WaitForChild(closestEnemy.Name),
-							[3] = contador
-						}
-						game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-						game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = args[2]
+				local petModels = {} -- Table to store the model paths
+
+				-- Find and store the model paths in the petModels table
+				for _, myPet in ipairs(myPets) do
+					local myPetName = myPet.Name
+					for _, petModel in ipairs(allPets) do
+						if petModel:IsA("Model") and petModel.Name == myPetName then
+							table.insert(petModels, petModel:GetFullName())
+							print('petModel added:', petModel.Name)
+						end
+						wait()
 					end
+				end
+
+
+				-- Modify each model using the stored paths
+				for _, petPath in ipairs(petModels) do
+					local petModel = workspace:FindFirstChild(petPath)
+					print('tentou atacar!')
+					contador = contador + 1
+					local args = {
+						[1] = petPath,
+						[2] = enemies:WaitForChild(closestEnemy.Name),
+						[3] = contador
+					}
+					print('chegou')
+					print(unpack(args))
+					game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+					petPath.Data.Attacking.Value = args[2]
+					print("Modifying:", petModel.Name)
 					wait()
 				end
+				
+				
 				if not getgenv().autoAttackGP then
 					for _, pet in ipairs(myPets) do
-						if tostring(workspace:WaitForChild("Pets"):WaitForChild(pet.Name).Data.Owner.Value) == game:GetService("Players").LocalPlayer.Name then
-							local args = {
-								[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
-							}
-							game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-							game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = nill
-						end
+						local args = {
+							[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
+						}
+						game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+						game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = nill
 					end
 					break
 				end
@@ -173,8 +197,63 @@ end
 function dailySpin()
 	spawn(function()
 		while getgenv().dailySpin do
-	            wait(10)
-	            game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("DailySpin"):FireServer()
+			wait(10)
+			game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("DailySpin"):FireServer()
+		end
+	end)
+end
+
+function autoMount()
+	spawn(function()
+		while getgenv().autoMount do
+			wait(1)
+			local args = {
+				[1] = true
+			}
+			game:GetService("ReplicatedStorage").Remote.SetMounted:FireServer(unpack(args))
+		end
+	end)
+end
+
+function savePosition()
+    spawn(function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			savedWorld = player.World.Value
+            savedPosition = player.Character.HumanoidRootPart.CFrame
+        end
+    end)
+end
+	
+function teleportToSavedPosition()
+    spawn(function()
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			local args = {
+				[1] = savedWorld
+			}
+
+			game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))
+			wait(2)
+            player.Character.HumanoidRootPart.CFrame = savedPosition
+        end
+    end)
+end
+
+function infTowerTP()
+	spawn(function()
+		while getgenv().infTowerTP do
+			wait(5)
+			if tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value) == "StartRoom" then
+				local args = {
+					[1] = 1
+				}
+				game:GetService("ReplicatedStorage").Remote.JoinInfinityTower:FireServer(unpack(args))
+				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)
+
+				defeatScreen = game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerLose")
+				while not defeatScreen.Visible do wait() end
+				wait(5)
+				teleportToSavedPosition()
+			end
 		end
 	end)
 end
@@ -233,7 +312,7 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
 end)
 -- AutoAttack
 getgenv().autoAttackGP = false
-Section:NewToggle("Auto Attack Gamepass", "Auto Attack Gamepass", function(state)
+Section:NewToggle("Auto Attack Gamepass (UNSTABLE)", "Auto Attack Gamepass (UNSTABLE)", function(state)
 	getgenv().autoAttackGP = state
     if state then
         autoAttackGP()
@@ -271,6 +350,34 @@ Section:NewToggle("Daily Spin", "Daily Spin", function(state)
 	getgenv().dailySpin = state
     if state then
         dailySpin()
+    else
+        print("Toggle Off")
+    end
+end)
+-- Auto Mount
+getgenv().autoMount = false
+Section:NewToggle("Auto Mount", "Auto Mount", function(state)
+	getgenv().autoMount = state
+    if state then
+        autoMount()
+    else
+        print("Toggle Off")
+    end
+end)
+
+--- Zer0hub FIX
+local Tab = Window:NewTab("Zer0hub Fix")
+local Section = Tab:NewSection("Zer0hub Fix")
+-- Save Position
+Section:NewButton("Save Position", "Save Position", function()
+    savePosition()
+end)
+-- Auto Infinity Tower TP
+getgenv().infTowerTP = false
+Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(state)
+	getgenv().infTowerTP = state
+    if state then
+        infTowerTP()
     else
         print("Toggle Off")
     end
