@@ -67,10 +67,11 @@ end
 function antiAFK()
     spawn(function()
         while getgenv().antiAFK do
-            for _, v in next, getconnections(game:GetService("Players").LocalPlayer.Idled) do
-                v:Disable()
-            end
-            wait(60)
+			wait()
+			for i,v in pairs(getconnections(game:GetService("Players").LocalPlayer.Idled)) do
+				v:Disable()
+				wait()
+			end
         end
     end)
 end
@@ -389,3 +390,4 @@ Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(s
         print("Toggle Off")
     end
 end)
+
