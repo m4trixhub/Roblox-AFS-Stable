@@ -254,14 +254,14 @@ function infTowerTP()
 			end
 
 			while getgenv().infinityInside do
-				wait(1)
-				if #infinityMap:GetChildren() > 0 then
-					wait()
-				else
+				wait(5)
+				if #infinityMap:GetChildren() == 0 then
 					teleportToSavedPosition()
+					break
+				else
+					wait()
 				end
 			end
-			
 		end
 	end)
 end
