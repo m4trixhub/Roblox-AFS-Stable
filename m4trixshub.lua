@@ -35,19 +35,19 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 
 -- Now 'itemsWithKeyword' is a list (table) containing the names of the items with the keyword "Egg" but excluding "JJBAStoneOceanEgg".
 
-_G.player = game:GetService("Players").LocalPlayer
-_G.worlds = game:GetService("Workspace"):WaitForChild("Worlds")
-_G.currentWorld = player.World.Value
-_G.savedPosition = nil
-_G.savedWorld = nil
+getgenv().player = game:GetService("Players").LocalPlayer
+getgenv().currentWorld = player.World.Value
+getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
+getgenv().savedPosition = nil
+getgenv().savedWorld = nil
 
 
 -- FUNCTIONS
 function maxOpen()
 	spawn(function()
 		while getgenv().maxOpen do
-			_G.A_1 = eggSelected
-		    _G.Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
+			getgenv().A_1 = eggSelected
+		    getgenv().Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
 		    Event:FireServer(A_1) 
 		    wait(0.6)
 		end
@@ -56,10 +56,10 @@ end
 
 function multiOpen()
     spawn(function()
-        while _G.multiOpen do
-            _G.A_1 = game:GetService("Workspace").Worlds[currentWorld][eggSelected]
-            _G.A_2 = 13
-            _G.Event = game:GetService("ReplicatedStorage").Remote.OpenEgg
+        while getgenv().multiOpen do
+            getgenv().A_1 = game:GetService("Workspace").Worlds[currentWorld][eggSelected]
+            getgenv().A_2 = 13
+            getgenv().Event = game:GetService("ReplicatedStorage").Remote.OpenEgg
             Event:InvokeServer(A_1, A_2)
             wait(1)
         end
@@ -68,7 +68,7 @@ end
 
 function antiAFK()
     spawn(function()
-        while _G.antiAFK do
+        while getgenv().antiAFK do
 			wait()
 			for i,v in pairs(getconnections(player.Idled)) do
 				v:Disable()
@@ -80,11 +80,11 @@ end
 
 function magnetGP()
     spawn(function()
-        while _G.magnetGP do
+        while getgenv().magnetGP do
             wait(1)
-            _G.workspace = game:GetService("Workspace")
-            _G.humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            _G.effects = workspace:FindFirstChild("Effects")
+            getgenv().workspace = game:GetService("Workspace")
+            getgenv().humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            getgenv().effects = workspace:FindFirstChild("Effects")
             if effects then
                 for _, effect in ipairs(effects:GetChildren()) do
                     pcall(function()
@@ -98,7 +98,7 @@ end
 
 function autoClickGP()
 	spawn(function()
-		while _G.autoClickGP do
+		while getgenv().autoClickGP do
             wait(0.025)
             game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("ClickerDamage"):FireServer()
 		end
@@ -107,7 +107,7 @@ end
 
 function sprintGP()
 	spawn(function()
-		while _G.sprintGP do
+		while getgenv().sprintGP do
             wait(0.25)
             if player.Character.Humanoid.WalkSpeed < 30 then
                 player.Character.Humanoid.WalkSpeed = 30
@@ -119,12 +119,12 @@ end
 
 function autoAttackGP()
     spawn(function()
-        while _G.autoAttackGP do
-			_G.enemies = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies")
-			_G.playerBody = player.Character:FindFirstChild("HumanoidRootPart")
-			_G.playerName = player.Name
-			_G.distance
-			_G.closestEnemy
+        while getgenv().autoAttackGP do
+			getgenv().enemies = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies")
+			getgenv().playerBody = player.Character:FindFirstChild("HumanoidRootPart")
+			getgenv().playerName = player.Name
+			local distance
+			local closestEnemy
 			
 			for _, enemy in ipairs(enemies:GetChildren()) do
 				wait()
@@ -197,7 +197,7 @@ end
 
 function dailySpin()
 	spawn(function()
-		while _G.dailySpin do
+		while getgenv().dailySpin do
 			wait(10)
 			game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("DailySpin"):FireServer()
 		end
@@ -206,7 +206,7 @@ end
 
 function autoMount()
 	spawn(function()
-		while _G.autoMount do
+		while getgenv().autoMount do
 			wait(1)
 			if player.Mounting.Value == "" then
 				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").ToggleMount:Fire()
@@ -218,8 +218,8 @@ end
 function savePosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			_G.savedWorld = currentWorld
-            _G.savedPosition = player.Character.HumanoidRootPart.CFrame
+			getgenv().savedWorld = currentWorld
+            getgenv().savedPosition = player.Character.HumanoidRootPart.CFrame
         end
     end)
 end
@@ -239,9 +239,9 @@ end
 
 function infTowerTP()
 	spawn(function()
-		while _G.infTowerTP do
-			_G.infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
-			_G.infinityInside = false
+		while getgenv().infTowerTP do
+			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
+			getgenv().infinityInside = false
 			wait(10)
 
 			if infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
@@ -275,9 +275,9 @@ Section:NewDropdown("Select Egg", "Select Egg", eggs, function(currentState)
     getgenv().eggSelected = currentState -- This will print the selected egg when chosen from the dropdown
 end)
 -- Multi Open
-_G.multiOpen = false
+getgenv().multiOpen = false
 Section:NewToggle("Multi Open", "Multi Open", function(state)
-	_G.multiOpen = state
+	getgenv().multiOpen = state
     if state then
         multiOpen()
     else
@@ -285,9 +285,9 @@ Section:NewToggle("Multi Open", "Multi Open", function(state)
     end
 end)
 -- Max Open
-_G.maxOpen = false
+getgenv().maxOpen = false
 Section:NewToggle("Max Open", "Max Open", function(state)
-	_G.maxOpen = state
+	getgenv().maxOpen = state
     if state then
         maxOpen()
     else
@@ -299,9 +299,9 @@ end)
 local Tab = Window:NewTab("GAMEPASS")
 local Section = Tab:NewSection("Gamepass")
 -- Magnet
-_G.magnetGP = false
+getgenv().magnetGP = false
 Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
-	_G.magnetGP = state
+	getgenv().magnetGP = state
     if state then
         magnetGP()
     else
@@ -309,9 +309,9 @@ Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
     end
 end)
 -- AutoClick
-_G.autoClickGP = false
+getgenv().autoClickGP = false
 Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
-	_G.autoClickGP = state
+	getgenv().autoClickGP = state
     if state then
         autoClickGP()
     else
@@ -319,9 +319,9 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
     end
 end)
 -- AutoAttack
-_G.autoAttackGP = false
+getgenv().autoAttackGP = false
 Section:NewToggle("Auto Attack Gamepass (UNSTABLE)", "Auto Attack Gamepass (UNSTABLE)", function(state)
-	_G.autoAttackGP = state
+	getgenv().autoAttackGP = state
     if state then
         autoAttackGP()
     else
@@ -329,9 +329,9 @@ Section:NewToggle("Auto Attack Gamepass (UNSTABLE)", "Auto Attack Gamepass (UNST
     end
 end)
 -- Sprint
-_G.sprintGP = false
+getgenv().sprintGP = false
 Section:NewToggle("Sprint Gamepass", "Sprint Gamepass", function(state)
-	_G.sprintGP = state
+	getgenv().sprintGP = state
     if state then
         sprintGP()
     else
@@ -343,9 +343,9 @@ end)
 local Tab = Window:NewTab("MISC")
 local Section = Tab:NewSection("Misc")
 -- Anti-AFK
-_G.antiAFK = false
+getgenv().antiAFK = false
 Section:NewToggle("Anti-AFK", "Anti-AFK", function(state)
-	_G.antiAFK = state
+	getgenv().antiAFK = state
     if state then
         antiAFK()
     else
@@ -353,9 +353,9 @@ Section:NewToggle("Anti-AFK", "Anti-AFK", function(state)
     end
 end)
 -- Daily Spin
-_G.dailySpin = false
+getgenv().dailySpin = false
 Section:NewToggle("Daily Spin", "Daily Spin", function(state)
-	_G.dailySpin = state
+	getgenv().dailySpin = state
     if state then
         dailySpin()
     else
@@ -363,9 +363,9 @@ Section:NewToggle("Daily Spin", "Daily Spin", function(state)
     end
 end)
 -- Auto Mount
-_G.autoMount = false
+getgenv().autoMount = false
 Section:NewToggle("Auto Mount", "Auto Mount", function(state)
-	_G.autoMount = state
+	getgenv().autoMount = state
     if state then
         autoMount()
     else
@@ -381,12 +381,13 @@ Section:NewButton("Save Position", "Save Position", function()
     savePosition()
 end)
 -- Auto Infinity Tower TP
-_G.infTowerTP = false
+getgenv().infTowerTP = false
 Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(state)
-	_G.infTowerTP = state
+	getgenv().infTowerTP = state
     if state then
         infTowerTP()
     else
         print("Toggle Off")
     end
 end)
+
