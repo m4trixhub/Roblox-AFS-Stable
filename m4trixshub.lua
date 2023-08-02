@@ -36,6 +36,7 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 -- Now 'itemsWithKeyword' is a list (table) containing the names of the items with the keyword "Egg" but excluding "JJBAStoneOceanEgg".
 
 getgenv().player = game.Players.LocalPlayer
+getgenv().currentWorld = player.World.Value
 getgenv().savedPosition = nil
 getgenv().savedWorld = nil
 
@@ -54,7 +55,7 @@ end
 function multiOpen()
     spawn(function()
         while getgenv().multiOpen do
-            getgenv().currentWorld = game:GetService("Players").LocalPlayer.World.Value
+            getgenv().currentWorld = player.World.Value
             getgenv().A_1 = game:GetService("Workspace").Worlds[currentWorld][eggSelected]
             getgenv().A_2 = 13
             getgenv().Event = game:GetService("ReplicatedStorage").Remote.OpenEgg
@@ -242,26 +243,26 @@ function infTowerTP()
 			getgenv().infinityMap = workspace:WaitForChild("Worlds"):WaitForChild("InfinityTower"):WaitForChild("Map")
 			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
 			getgenv().infinityInside = false
-			wait(15)
+			wait(10)
 
-			if getgenv().infinityDoor == "StartRoom" then -- Teleport to Infinity Tower.
+			if getgenv().infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
 				local args = {
 					[1] = 1
 				}
-				game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))
-				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)
+				game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))	-- Teleports LocalPlayer to Infinity Tower.
+				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
 				getgenv().infinityInside = true
+				wait(2)
 			end
 
 			while getgenv().infinityInside do
 				wait(5)
-				if #infinityMap:GetChildren() == 0 then
+				if getgenv().currentWorld ~= "InfinityTower" then -- Detects if LocalPlayer is in Infinity Tower.
 					teleportToSavedPosition()
 					break
-				else
-					wait()
 				end
 			end
+
 		end
 	end)
 end
@@ -390,4 +391,3 @@ Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(s
         print("Toggle Off")
     end
 end)
-
