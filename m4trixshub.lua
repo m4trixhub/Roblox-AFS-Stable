@@ -355,7 +355,7 @@ Section:NewToggle("Daily Spin", "Daily Spin", function(state)
 end)
 -- Auto Mount
 getgenv().autoMount = false
-Section:NewToggle("Auto Mount", "Auto Mount", function(state)
+Section:NewToggle("Auto Mount (Not working, yet!)", "Auto Mount (Not working, yet!)", function(state)
 	getgenv().autoMount = state
     if state then
         autoMount()
