@@ -230,10 +230,9 @@ function teleportToSavedPosition()
 			local args = {
 				[1] = savedWorld
 			}
-
+			
+			player.Character.HumanoidRootPart.CFrame = savedPosition
 			game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))
-			wait(2)
-            player.Character.HumanoidRootPart.CFrame = savedPosition
         end
     end)
 end
