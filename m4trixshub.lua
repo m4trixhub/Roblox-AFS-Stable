@@ -38,8 +38,8 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 getgenv().player = game:GetService("Players").LocalPlayer
 getgenv().currentWorld = player.World.Value
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
-getgenv().savedPosition = nil
-getgenv().savedWorld = nil
+getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375)
+getgenv().savedWorld = "TimeChamber"
 
 
 -- FUNCTIONS
@@ -218,8 +218,8 @@ end
 function savePosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			getgenv().savedWorld = currentWorld
-            getgenv().savedPosition = player.Character.HumanoidRootPart.CFrame
+			savedWorld = currentWorld
+            savedPosition = player.Character.HumanoidRootPart.CFrame
         end
     end)
 end
@@ -390,4 +390,3 @@ Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(s
         print("Toggle Off")
     end
 end)
-
