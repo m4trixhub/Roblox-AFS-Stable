@@ -41,6 +41,9 @@ getgenv().allPets = game:GetService("Workspace").Pets:GetChildren()
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
+local timeTeam = {}
+local draconicTeam = {}
+
 
 
 -- FUNCTIONS
@@ -228,6 +231,7 @@ end
 function teleportToSavedPosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+			wait(5)
 			local args = {
 				[1] = savedWorld
 			}
@@ -240,76 +244,100 @@ end
 
 function saveDraconic()
     spawn(function()
-		getgenv().draconicTeam = {}
+        draconicTeam = {} -- Note: No need for getgenv() here, as it's already in the global scope.
 
-		print('Saving Draconic team...')
-		for _, pet in ipairs(allPets) do
-			if pet:isA("Model") then
-				if pet.Data then
-					if tostring(pet.Data.Owner.Value) == player.Name then
-						table.insert(draconicTeam, pet:GetDebugId())
-					end
-				end
-			end
-		end
+        print('======== ANALYZING... =========')
+        for _, pet in ipairs(allPets) do
+            if pet:IsA("Model") then
+                -- print("Analyzing " .. pet.Name .. " to TIME team...")
+                if pet:FindFirstChild("Data") then
+                    if tostring(pet.Data.Owner.Value) == player.Name then
+                        table.insert(draconicTeam, pet.Data.UID.Value)
+                        print("The following pet was successfully saved: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
+                    end
+                end
+            end
+        end
+		repeat wait() until draconicTeam
+        print("Team saved!")
     end)
 end
 
 function saveTime()
     spawn(function()
-		getgenv().timeTeam = {}
+        timeTeam = {} -- Note: No need for getgenv() here, as it's already in the global scope.
 
-		print('Saving Time team...')
-		for _, pet in ipairs(allPets) do
-			if pet:isA("Model") then
-				if pet.Data then
-					if tostring(pet.Data.Owner.Value) == player.Name then
-						table.insert(draconicTeam, pet:GetDebugId())
-					end
-				end
-			end
-		end
+        print('======== ANALYZING... =========')
+        for _, pet in ipairs(allPets) do
+            if pet:IsA("Model") then
+                -- print("Analyzing " .. pet.Name .. " to TIME team...")
+                if pet:FindFirstChild("Data") then
+                    if tostring(pet.Data.Owner.Value) == player.Name then
+                        table.insert(timeTeam, pet.Data.UID.Value)
+                        print("The following pet was successfully saved: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
+                    end
+                end
+            end
+        end
+		repeat wait() until timeTeam
+        print("Team saved!")
     end)
 end
 
 function equipDraconic()
 	spawn(function()
-		local contador = 0
+        while #draconicTeam == 0 do
+            wait()
+        end
 
-		for _, petId in ipairs(draconicTeam) do
-			wait()
-			contador = contador + 1
+        local contador = 0
 
-			local args = {
-				[1] = petId,
-				[2] = "Equip",
-				[3] = contador
-			}
+        for _, petId in ipairs(draconicTeam) do
+            print(petId)
+        end
 
-			game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
-		end
+        print("Equipping Times...")
+        for _, petId in ipairs(draconicTeam) do
+            wait()
+            contador = contador + 1
 
+            local args = {
+                [1] = petId,
+                [2] = "Equip",
+                [3] = contador
+            }
+
+            game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
+        end
 	end)
 end
 
 function equipTime()
-	spawn(function()
-		local contador = 0
+    spawn(function()
+        while #timeTeam == 0 do
+            wait()
+        end
 
-		for _, petId in ipairs(timeTeam) do
-			wait()
-			contador = contador + 1
+        local contador = 0
 
-			local args = {
-				[1] = petId,
-				[2] = "Equip",
-				[3] = contador
-			}
+        for _, petId in ipairs(timeTeam) do
+            print(petId)
+        end
 
-			game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
-		end
+        print("Equipping Times...")
+        for _, petId in ipairs(timeTeam) do
+            wait()
+            contador = contador + 1
 
-	end)
+            local args = {
+                [1] = petId,
+                [2] = "Equip",
+                [3] = contador
+            }
+
+            game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
+        end
+    end)
 end
 
 function infTowerTP()
@@ -317,6 +345,7 @@ function infTowerTP()
 		while getgenv().infTowerTP do
 			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
 			getgenv().infinityInside = false
+			getgenv().infinityTimer = game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerTimer"):WaitForChild("TotalTime").Value
 			wait(10)
 
 			if infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
@@ -333,20 +362,25 @@ function infTowerTP()
 			end
 
 			while infinityInside do
-				wait(5)
-				if currentWorld == "Tower" then -- Detects if LocalPlayer is in Infinity Tower.
-					if timeTeam then
-						equipTime()
-					end
-					teleportToSavedPosition()
-					break
+				repeat wait(0.3) until infinityTimer == "00:15"
+				if timeTeam then
+					equipTime()
 				end
+				teleportToSavedPosition()
+				infinityInside = false
 			end
 
 		end
 	end)
 end
 
+function clearTeams()
+    spawn(function()
+        for k in pairs(timeTeam) do
+            timeTeam[k] = nil
+        end
+    end)
+end
 
 
 --- MAIN
@@ -482,4 +516,16 @@ end)
 -- Save Time team
 Section:NewButton("Save Time", "Save Time", function()
     saveTime()
+end)
+-- Equip Draconic team
+Section:NewButton("[DEBUG] Equip Draconic", "Equip Draconic", function()
+    equipDraconic()
+end)
+-- Equip Time team
+Section:NewButton("[DEBUG] Equip Time", "Equip Time", function()
+    equipTime()
+end)
+-- Clear teams
+Section:NewButton("[DEBUG] Clear teams", "[DEBUG] Clear teams", function()
+    clearTeams()
 end)
