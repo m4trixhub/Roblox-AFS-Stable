@@ -244,12 +244,11 @@ end
 
 function saveDraconic()
     spawn(function()
-        draconicTeam = {} -- Note: No need for getgenv() here, as it's already in the global scope.
+        draconicTeam = {}
 
         print('======== ANALYZING... =========')
         for _, pet in ipairs(allPets) do
             if pet:IsA("Model") then
-                -- print("Analyzing " .. pet.Name .. " to TIME team...")
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
                         table.insert(draconicTeam, pet.Data.UID.Value)
@@ -265,12 +264,11 @@ end
 
 function saveTime()
     spawn(function()
-        timeTeam = {} -- Note: No need for getgenv() here, as it's already in the global scope.
+        timeTeam = {}
 
         print('======== ANALYZING... =========')
         for _, pet in ipairs(allPets) do
             if pet:IsA("Model") then
-                -- print("Analyzing " .. pet.Name .. " to TIME team...")
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
                         table.insert(timeTeam, pet.Data.UID.Value)
@@ -517,15 +515,17 @@ end)
 Section:NewButton("Save Time", "Save Time", function()
     saveTime()
 end)
+
+local Section = Tab:NewSection("[DEBUG]")
 -- Equip Draconic team
-Section:NewButton("[DEBUG] Equip Draconic", "Equip Draconic", function()
+Section:NewButton("Equip Draconic", "Equip Draconic", function()
     equipDraconic()
 end)
 -- Equip Time team
-Section:NewButton("[DEBUG] Equip Time", "Equip Time", function()
+Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
 -- Clear teams
-Section:NewButton("[DEBUG] Clear teams", "[DEBUG] Clear teams", function()
+Section:NewButton("Clear teams", "Clear teams", function()
     clearTeams()
 end)
