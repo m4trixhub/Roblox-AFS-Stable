@@ -37,7 +37,6 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 
 getgenv().player = game:GetService("Players").LocalPlayer
 getgenv().currentWorld = player.World.Value
-getgenv().allPets = game:GetService("Workspace").Pets:GetChildren()
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
@@ -222,8 +221,10 @@ end
 function savePosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			savedPosition = player.Character.HumanoidRootPart.CFrame									-- Saves LocalPlayer's Cframe.
-			savedWorld = currentWorld																	-- Saves LocalPlayer's World.
+			savedPosition = player.Character.HumanoidRootPart.CFrame								-- Saves LocalPlayer's Cframe.
+			savedWorld = player.World.Value								-- Saves LocalPlayer's World.
+            print(savedPosition)
+            print(savedWorld)
         end
     end)
 end
@@ -231,7 +232,7 @@ end
 function teleportToSavedPosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			wait(5)
+			wait(2)
 			local args = {
 				[1] = savedWorld
 			}
@@ -247,7 +248,7 @@ function saveDraconic()
         draconicTeam = {}
 
         print('======== ANALYZING... =========')
-        for _, pet in ipairs(allPets) do
+        for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
             if pet:IsA("Model") then
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
@@ -257,7 +258,7 @@ function saveDraconic()
                 end
             end
         end
-		repeat wait() until draconicTeam
+        repeat wait() until draconicTeam
         print("Team saved!")
     end)
 end
@@ -267,7 +268,7 @@ function saveTime()
         timeTeam = {}
 
         print('======== ANALYZING... =========')
-        for _, pet in ipairs(allPets) do
+        for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
             if pet:IsA("Model") then
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
@@ -277,7 +278,7 @@ function saveTime()
                 end
             end
         end
-		repeat wait() until timeTeam
+        repeat wait() until timeTeam
         print("Team saved!")
     end)
 end
@@ -343,8 +344,8 @@ function infTowerTP()
 		while getgenv().infTowerTP do
 			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
 			getgenv().infinityInside = false
-			getgenv().infinityTimer = game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerTimer"):WaitForChild("TotalTime").Value
-			wait(10)
+			getgenv().infinityTimer = ""
+			wait(15)
 
 			if infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
 				local args = {
@@ -353,13 +354,14 @@ function infTowerTP()
 				game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))	-- Teleports LocalPlayer to Infinity Tower.
 				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
 				infinityInside = true
-				wait(2)
 				if draconicTeam then
 					equipDraconic()
 				end
 			end
 
 			while infinityInside do
+                infinityTimer = player.PlayerGui.MainGui:WaitForChild("InfinityTowerTimer"):WaitForChild("Main"):WaitForChild("Time").Text
+                
 				repeat wait(0.3) until infinityTimer == "00:15"
 				if timeTeam then
 					equipTime()
@@ -370,14 +372,6 @@ function infTowerTP()
 
 		end
 	end)
-end
-
-function clearTeams()
-    spawn(function()
-        for k in pairs(timeTeam) do
-            timeTeam[k] = nil
-        end
-    end)
 end
 
 
@@ -525,7 +519,7 @@ end)
 Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
--- Clear teams
-Section:NewButton("Clear teams", "Clear teams", function()
-    clearTeams()
+-- TESTE
+Section:NewButton("Teleport Position", "Teleport Position", function()
+    teleportToSavedPosition()
 end)
