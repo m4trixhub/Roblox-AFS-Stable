@@ -3,7 +3,7 @@ repeat wait() until game:IsLoaded()
 -- LIBRARY SOURCE
 
 getgenv().colors = {
-    SchemeColor = Color3.fromRGB(229, 175, 0),
+    SchemeColor = Color3.fromRGB(207, 7, 0),
     Background = Color3.fromRGB(0, 0, 0),
     Header = Color3.fromRGB(0, 0, 0),
     TextColor = Color3.fromRGB(255,255,255),
@@ -37,6 +37,7 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 
 getgenv().player = game:GetService("Players").LocalPlayer
 getgenv().currentWorld = player.World.Value
+getgenv().allPets = game:GetService("Workspace").Pets:GetChildren()
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
@@ -237,6 +238,80 @@ function teleportToSavedPosition()
     end)
 end
 
+function saveDraconic()
+    spawn(function()
+		getgenv().draconicTeam = {}
+
+		print('Saving Draconic team...')
+		for _, pet in ipairs(allPets) do
+			if pet:isA("Model") then
+				if pet.Data then
+					if tostring(pet.Data.Owner.Value) == player.Name then
+						table.insert(draconicTeam, pet:GetDebugId())
+					end
+				end
+			end
+		end
+    end)
+end
+
+function saveTime()
+    spawn(function()
+		getgenv().timeTeam = {}
+
+		print('Saving Time team...')
+		for _, pet in ipairs(allPets) do
+			if pet:isA("Model") then
+				if pet.Data then
+					if tostring(pet.Data.Owner.Value) == player.Name then
+						table.insert(draconicTeam, pet:GetDebugId())
+					end
+				end
+			end
+		end
+    end)
+end
+
+function equipDraconic()
+	spawn(function()
+		local contador = 0
+
+		for _, petId in ipairs(draconicTeam) do
+			wait()
+			contador = contador + 1
+
+			local args = {
+				[1] = petId,
+				[2] = "Equip",
+				[3] = contador
+			}
+
+			game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
+		end
+
+	end)
+end
+
+function equipTime()
+	spawn(function()
+		local contador = 0
+
+		for _, petId in ipairs(timeTeam) do
+			wait()
+			contador = contador + 1
+
+			local args = {
+				[1] = petId,
+				[2] = "Equip",
+				[3] = contador
+			}
+
+			game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
+		end
+
+	end)
+end
+
 function infTowerTP()
 	spawn(function()
 		while getgenv().infTowerTP do
@@ -252,11 +327,17 @@ function infTowerTP()
 				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
 				infinityInside = true
 				wait(2)
+				if draconicTeam then
+					equipDraconic()
+				end
 			end
 
 			while infinityInside do
 				wait(5)
 				if currentWorld == "Tower" then -- Detects if LocalPlayer is in Infinity Tower.
+					if timeTeam then
+						equipTime()
+					end
 					teleportToSavedPosition()
 					break
 				end
@@ -265,6 +346,7 @@ function infTowerTP()
 		end
 	end)
 end
+
 
 
 --- MAIN
@@ -375,11 +457,8 @@ end)
 
 --- Zer0hub FIX
 local Tab = Window:NewTab("Zer0hub Fix")
-local Section = Tab:NewSection("Zer0hub Fix")
--- Save Position
-Section:NewButton("Save Position", "Save Position", function()
-    savePosition()
-end)
+local Section = Tab:NewSection("Infinity Tower")
+
 -- Auto Infinity Tower TP
 getgenv().infTowerTP = false
 Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(state)
@@ -389,4 +468,18 @@ Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(s
     else
         print("Toggle Off")
     end
+end)
+-- Save Position
+Section:NewButton("Save Position", "Save Position", function()
+    savePosition()
+end)
+
+local Section = Tab:NewSection("Saving Teams")
+-- Save Draconic team
+Section:NewButton("Save Draconic", "Save Draconic", function()
+    saveDraconic()
+end)
+-- Save Time team
+Section:NewButton("Save Time", "Save Time", function()
+    saveTime()
 end)
