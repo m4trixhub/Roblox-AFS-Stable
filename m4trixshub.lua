@@ -38,8 +38,8 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 getgenv().player = game:GetService("Players").LocalPlayer
 getgenv().currentWorld = player.World.Value
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
-getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375)
-getgenv().savedWorld = "TimeChamber"
+getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
+getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
 
 
 -- FUNCTIONS
@@ -218,8 +218,8 @@ end
 function savePosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			savedWorld = currentWorld
-            savedPosition = player.Character.HumanoidRootPart.CFrame
+			savedPosition = player.Character.HumanoidRootPart.CFrame									-- Saves LocalPlayer's Cframe.
+			savedWorld = currentWorld																	-- Saves LocalPlayer's World.
         end
     end)
 end
@@ -231,8 +231,8 @@ function teleportToSavedPosition()
 				[1] = savedWorld
 			}
 			
-			player.Character.HumanoidRootPart.CFrame = savedPosition
-			game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))
+			player.Character.HumanoidRootPart.CFrame = savedPosition									-- Loads saved LocalPlayer's Cframe.
+			game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))		-- Loads saved LocalPlayer's World.
         end
     end)
 end
