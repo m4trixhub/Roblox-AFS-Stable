@@ -1,4 +1,4 @@
-repeat wait() until game:IsLoaded()
+repeat task.wait() until game:IsLoaded()
 
 -- LIBRARY SOURCE
 
@@ -36,7 +36,7 @@ getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
 -- Now 'itemsWithKeyword' is a list (table) containing the names of the items with the keyword "Egg" but excluding "JJBAStoneOceanEgg".
 
 getgenv().player = game:GetService("Players").LocalPlayer
-getgenv().currentWorld = player.World.Value
+getgenv().currentWorld = game:GetService("Players").LocalPlayer.World.Value
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
@@ -52,7 +52,7 @@ function maxOpen()
 			getgenv().A_1 = eggSelected
 		    getgenv().Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
 		    Event:FireServer(A_1) 
-		    wait(0.6)
+		    task.wait(0.6)
 		end
 	end)
 end
@@ -64,7 +64,7 @@ function multiOpen()
             getgenv().A_2 = 13
             getgenv().Event = game:GetService("ReplicatedStorage").Remote.OpenEgg
             Event:InvokeServer(A_1, A_2)
-            wait(1)
+            task.wait(1)
         end
     end)
 end
@@ -72,10 +72,10 @@ end
 function antiAFK()
     spawn(function()
         while getgenv().antiAFK do
-			wait()
+			task.wait()
 			for i,v in pairs(getconnections(player.Idled)) do
 				v:Disable()
-				wait()
+				task.wait()
 			end
         end
     end)
@@ -84,7 +84,7 @@ end
 function magnetGP()
     spawn(function()
         while getgenv().magnetGP do
-            wait(1)
+            task.wait(1)
             getgenv().workspace = game:GetService("Workspace")
             getgenv().humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             getgenv().effects = workspace:FindFirstChild("Effects")
@@ -102,7 +102,7 @@ end
 function autoClickGP()
 	spawn(function()
 		while getgenv().autoClickGP do
-            wait(0.025)
+            task.wait(0.025)
             game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("ClickerDamage"):FireServer()
 		end
 	end)
@@ -111,7 +111,7 @@ end
 function sprintGP()
 	spawn(function()
 		while getgenv().sprintGP do
-            wait(0.25)
+            task.wait(0.25)
             if player.Character.Humanoid.WalkSpeed < 30 then
                 player.Character.Humanoid.WalkSpeed = 30
             end
@@ -130,7 +130,7 @@ function autoAttackGP()
 			local closestEnemy
 			
 			for _, enemy in ipairs(enemies:GetChildren()) do
-				wait()
+				task.wait()
 				distance = ((enemy.HumanoidRootPart.Position or enemy.PrimaryPart.Position) - playerBody.Position).magnitude
 				if distance < 20 then
 					closestEnemy = enemy
@@ -157,7 +157,7 @@ function autoAttackGP()
 							table.insert(petModels, petModel:GetFullName())
 							print('petModel added:', petModel.Name)
 						end
-						wait()
+						task.wait()
 					end
 				end
 
@@ -177,7 +177,7 @@ function autoAttackGP()
 					game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
 					petPath.Data.Attacking.Value = args[2]
 					print("Modifying:", petModel.Name)
-					wait()
+					task.wait()
 				end
 				
 				
@@ -191,7 +191,7 @@ function autoAttackGP()
 					end
 					break
 				end
-				wait() -- Adjust the delay before the next iteration
+				task.wait() -- Adjust the delay before the next iteration
 			end
 		end
 	end)
@@ -201,7 +201,7 @@ end
 function dailySpin()
 	spawn(function()
 		while getgenv().dailySpin do
-			wait(10)
+			task.wait(10)
 			game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("DailySpin"):FireServer()
 		end
 	end)
@@ -210,7 +210,7 @@ end
 function autoMount()
 	spawn(function()
 		while getgenv().autoMount do
-			wait(1)
+			task.wait(1)
 			if player.Mounting.Value == "" then
 				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").ToggleMount:Fire()
 			end
@@ -228,11 +228,11 @@ function savePosition()
         end
     end)
 end
-	
+
 function teleportToSavedPosition()
     spawn(function()
         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-			wait(2)
+			task.wait(2)
 			local args = {
 				[1] = savedWorld
 			}
@@ -259,7 +259,7 @@ function saveDraconic()
                 end
             end
         end
-        repeat wait() until draconicTeam
+        repeat task.wait() until draconicTeam
         print("Team saved!")
     end)
 end
@@ -279,7 +279,7 @@ function saveTime()
                 end
             end
         end
-        repeat wait() until timeTeam
+        repeat task.wait() until timeTeam
         print("Team saved!")
     end)
 end
@@ -292,9 +292,9 @@ function equipDraconic()
             print(petId)
         end
 
-        print("Equipping Times...")
+        print("Equipping equipDraconic function...")
         for _, petId in ipairs(draconicTeam) do
-            wait()
+            task.wait()
             contador = contador + 1
 
             local args = {
@@ -305,6 +305,7 @@ function equipDraconic()
 
             game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
         end
+
 	end)
 end
 
@@ -316,9 +317,9 @@ function equipTime()
             print(petId)
         end
 
-        print("Equipping Times...")
+        print("Executing equipTime function...")
         for _, petId in ipairs(timeTeam) do
-            wait()
+            task.wait()
             contador = contador + 1
 
             local args = {
@@ -329,44 +330,54 @@ function equipTime()
 
             game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
         end
+
     end)
 end
 
 function infTowerTP()
 	spawn(function()
 		while getgenv().infTowerTP do
-			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
-			getgenv().infinityInside = false
-			wait(15)
 
-			if infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
-				local args = {
-					[1] = 1
-				}
-				game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))	-- Teleports LocalPlayer to Infinity Tower.
-				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
-				infinityInside = true
-				if draconicTeam then
-                    print('------------------------------- EQUIPPING DRACONIC TEAM ------------------------------------')
-					equipDraconic()
-				end
-			end
+            print('------------------------ Searching for the next Infinity Tower... ----------------------------')
+			task.wait(5)
 
-			while infinityInside do
-                player = game:GetService("Players").LocalPlayer
-                infinityTimer = player.PlayerGui.MainGui:WaitForChild("InfinityTowerTimer"):WaitForChild("Main"):WaitForChild("Time").Text
-                infinityLose = player.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible
-                print('Waiting for the end of the INFINITY TOWER...')
-				repeat wait(0.3) until infinityLose
-                print('----------------------------------- INFINITY TOWER ENDED --------------------------------------------')
-				if timeTeam then
-                    print('------------------------------- EQUIPPING TIME TEAM ------------------------------------')
-					equipTime()
-				end
-				teleportToSavedPosition()
-                print('Resetting Infinity Tower TP...')
-				infinityInside = false
-			end
+            if game:GetService("Players").LocalPlayer.World.Value == "InfinityTower" then
+                while true do
+                    print('Waiting for Infinity Tower to end...')
+                    task.wait(2)
+                    if game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible == true then
+                        break
+                    end
+                end
+                print('------------------------- INFINITY TOWER ENDED -----------------------------')
+
+                if timeTeam then
+                    print('----------------------- EQUIPPING TIME TEAM -----------------------------')
+                    equipTime()
+                    task.wait(3)
+                end
+
+                teleportToSavedPosition()
+                task.wait(2)
+            else
+
+                if tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value) == "StartRoom" then -- Detects if Infinity Tower door is open.
+                    local args = {
+                        [1] = 1
+                    }
+                    game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))	-- Teleports LocalPlayer to Infinity Tower.
+                    game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
+                    print('------------------- INFINITY TOWER STARTED! --------------------')
+
+                    if draconicTeam then
+                        print('----------------------- EQUIPPING DRACONIC TEAM -----------------------')
+                        equipDraconic()
+                        task.wait(3)
+                    end
+
+                end
+
+            end
 
 		end
 	end)
