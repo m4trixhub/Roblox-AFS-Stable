@@ -43,7 +43,7 @@ getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's worl
 local timeTeam = {}
 local draconicTeam = {}
 
-
+print("Running...")
 
 -- FUNCTIONS
 function maxOpen()
@@ -236,8 +236,9 @@ function teleportToSavedPosition()
 			local args = {
 				[1] = savedWorld
 			}
-			
+			print("Teleporting pt. 1")
 			player.Character.HumanoidRootPart.CFrame = savedPosition									-- Loads saved LocalPlayer's Cframe.
+            print("Teleporting pt. 2")
 			game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))		-- Loads saved LocalPlayer's World.
         end
     end)
@@ -285,10 +286,6 @@ end
 
 function equipDraconic()
 	spawn(function()
-        while #draconicTeam == 0 do
-            wait()
-        end
-
         local contador = 0
 
         for _, petId in ipairs(draconicTeam) do
@@ -313,10 +310,6 @@ end
 
 function equipTime()
     spawn(function()
-        while #timeTeam == 0 do
-            wait()
-        end
-
         local contador = 0
 
         for _, petId in ipairs(timeTeam) do
@@ -344,7 +337,6 @@ function infTowerTP()
 		while getgenv().infTowerTP do
 			getgenv().infinityDoor = tostring(game:GetService("Workspace"):WaitForChild("Worlds"):WaitForChild("Tower"):WaitForChild("InfinityDoor"):WaitForChild("StartRoom").Value)
 			getgenv().infinityInside = false
-			getgenv().infinityTimer = ""
 			wait(15)
 
 			if infinityDoor == "StartRoom" then -- Detects if Infinity Tower door is open.
@@ -355,18 +347,24 @@ function infTowerTP()
 				game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
 				infinityInside = true
 				if draconicTeam then
+                    print('------------------------------- EQUIPPING DRACONIC TEAM ------------------------------------')
 					equipDraconic()
 				end
 			end
 
 			while infinityInside do
+                player = game:GetService("Players").LocalPlayer
                 infinityTimer = player.PlayerGui.MainGui:WaitForChild("InfinityTowerTimer"):WaitForChild("Main"):WaitForChild("Time").Text
-                
-				repeat wait(0.3) until infinityTimer == "00:15"
+                infinityLose = player.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible
+                print('Waiting for the end of the INFINITY TOWER...')
+				repeat wait(0.3) until infinityLose
+                print('----------------------------------- INFINITY TOWER ENDED --------------------------------------------')
 				if timeTeam then
+                    print('------------------------------- EQUIPPING TIME TEAM ------------------------------------')
 					equipTime()
 				end
 				teleportToSavedPosition()
+                print('Resetting Infinity Tower TP...')
 				infinityInside = false
 			end
 
@@ -520,6 +518,6 @@ Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
 -- TESTE
-Section:NewButton("Teleport Position", "Teleport Position", function()
+Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
