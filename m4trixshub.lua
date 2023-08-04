@@ -463,6 +463,18 @@ Section:NewToggle("Max Open", "Max Open", function(state)
     end
 end)
 
+-- Auto Attack
+local Section = Tab:NewSection("Auto Farm")
+getgenv().autoAttackGP = false
+Section:NewToggle("Auto Attack", "Auto Attack", function(state)
+	getgenv().autoAttackGP = state
+    if state then
+        autoAttackGP()
+    else
+        print("Toggle Off")
+    end
+end)
+
 --- GAMEPASSES
 local Tab = Window:NewTab("GAMEPASS")
 local Section = Tab:NewSection("Gamepass")
@@ -486,16 +498,7 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
         print("Toggle Off")
     end
 end)
--- AutoAttack
-getgenv().autoAttackGP = false
-Section:NewToggle("Auto Attack Gamepass (UNSTABLE)", "Auto Attack Gamepass (UNSTABLE)", function(state)
-	getgenv().autoAttackGP = state
-    if state then
-        autoAttackGP()
-    else
-        print("Toggle Off")
-    end
-end)
+
 -- Sprint
 getgenv().sprintGP = false
 Section:NewToggle("Sprint Gamepass", "Sprint Gamepass", function(state)
@@ -544,7 +547,6 @@ end)
 --- Zer0hub FIX
 local Tab = Window:NewTab("Zer0hub Fix")
 local Section = Tab:NewSection("Infinity Tower")
-
 -- Auto Infinity Tower TP
 getgenv().infTowerTP = false
 Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(state)
@@ -560,7 +562,9 @@ Section:NewButton("Save Position", "Save Position", function()
     savePosition()
 end)
 
-local Section = Tab:NewSection("Saving Teams")
+--- TEAMS
+local Tab = Window:NewTab("TEAMS")
+local Section = Tab:NewSection("Save Team")
 -- Save Draconic team
 Section:NewButton("Save Draconic", "Save Draconic", function()
     saveDraconic()
@@ -574,6 +578,8 @@ Section:NewButton("Save Time", "Save Time", function()
     saveTime()
 end)
 
+--- DEBUG
+local Tab = Window:NewTab("[DEBUG]")
 local Section = Tab:NewSection("[DEBUG]")
 -- Equip Draconic team
 Section:NewButton("Equip Draconic", "Equip Draconic", function()
@@ -587,8 +593,6 @@ end)
 Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
-
-
 -- Teleport to Saved Position
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
