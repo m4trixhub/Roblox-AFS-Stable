@@ -478,16 +478,6 @@ end)
 --- GAMEPASSES
 local Tab = Window:NewTab("GAMEPASS")
 local Section = Tab:NewSection("Gamepass")
--- Magnet
-getgenv().magnetGP = false
-Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
-	getgenv().magnetGP = state
-    if state then
-        magnetGP()
-    else
-        print("Toggle Off")
-    end
-end)
 -- AutoClick
 getgenv().autoClickGP = false
 Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
@@ -498,7 +488,16 @@ Section:NewToggle("Autoclick Gamepass", "Autoclick Gamepass", function(state)
         print("Toggle Off")
     end
 end)
-
+-- Magnet
+getgenv().magnetGP = false
+Section:NewToggle("Magnet Gamepass", "Magnet Gamepass", function(state)
+	getgenv().magnetGP = state
+    if state then
+        magnetGP()
+    else
+        print("Toggle Off")
+    end
+end)
 -- Sprint
 getgenv().sprintGP = false
 Section:NewToggle("Sprint Gamepass", "Sprint Gamepass", function(state)
@@ -523,22 +522,22 @@ Section:NewToggle("Anti-AFK", "Anti-AFK", function(state)
         print("Toggle Off")
     end
 end)
--- Daily Spin
-getgenv().dailySpin = false
-Section:NewToggle("Daily Spin", "Daily Spin", function(state)
-	getgenv().dailySpin = state
-    if state then
-        dailySpin()
-    else
-        print("Toggle Off")
-    end
-end)
 -- Auto Mount
 getgenv().autoMount = false
 Section:NewToggle("Auto Mount", "Auto Mount", function(state)
 	getgenv().autoMount = state
     if state then
         autoMount()
+    else
+        print("Toggle Off")
+    end
+end)
+-- Daily Spin
+getgenv().dailySpin = false
+Section:NewToggle("Daily Spin", "Daily Spin", function(state)
+	getgenv().dailySpin = state
+    if state then
+        dailySpin()
     else
         print("Toggle Off")
     end
