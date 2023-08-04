@@ -42,6 +42,7 @@ getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6
 getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
 local timeTeam = {}
 local draconicTeam = {}
+local luckyTeam = {}
 
 print("Running...")
 
@@ -49,10 +50,20 @@ print("Running...")
 function maxOpen()
 	spawn(function()
 		while getgenv().maxOpen do
-			getgenv().A_1 = eggSelected
-		    getgenv().Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
-		    Event:FireServer(A_1) 
-		    task.wait(0.6)
+            local cdMaxOpen = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Hatch.Buttons.Multi.Price.Text
+            task.wait()
+            if cdMaxOpen == ("0:01" or "MAX") then
+                if luckyTeam then
+                    equipLucky()
+                end
+                task.wait(1)
+                getgenv().A_1 = eggSelected
+                getgenv().Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
+                Event:FireServer(A_1)
+                if timeTeam then
+                    equipTime()
+                end
+            end
 		end
 	end)
 end
@@ -248,18 +259,40 @@ function saveDraconic()
     spawn(function()
         draconicTeam = {}
 
-        print('======== ANALYZING... =========')
+        print('======== ANALYZING CURRENT TEAM... =========')
         for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
             if pet:IsA("Model") then
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
                         table.insert(draconicTeam, pet.Data.UID.Value)
-                        print("The following pet was successfully saved: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
+                        print("The following pet was successfully saved on Draconic team: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
                     end
                 end
             end
         end
+
         repeat task.wait() until draconicTeam
+        print("Team saved!")
+    end)
+end
+
+function saveLucky()
+    spawn(function()
+        luckyTeam = {}
+
+        print('======== ANALYZING CURRENT TEAM... =========')
+        for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+            if pet:IsA("Model") then
+                if pet:FindFirstChild("Data") then
+                    if tostring(pet.Data.Owner.Value) == player.Name then
+                        table.insert(draconicTeam, pet.Data.UID.Value)
+                        print("The following pet was successfully saved on Lucky team: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
+                    end
+                end
+            end
+        end
+
+        repeat task.wait() until luckyTeam
         print("Team saved!")
     end)
 end
@@ -268,17 +301,18 @@ function saveTime()
     spawn(function()
         timeTeam = {}
 
-        print('======== ANALYZING... =========')
+        print('======== ANALYZING CURRENT TEAM... =========')
         for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
             if pet:IsA("Model") then
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
                         table.insert(timeTeam, pet.Data.UID.Value)
-                        print("The following pet was successfully saved: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
+                        print("The following pet was successfully saved on Time team: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
                     end
                 end
             end
         end
+
         repeat task.wait() until timeTeam
         print("Team saved!")
     end)
@@ -288,12 +322,29 @@ function equipDraconic()
 	spawn(function()
         local contador = 0
 
+        print("Equipping Draconic team...")
         for _, petId in ipairs(draconicTeam) do
-            print(petId)
+            task.wait()
+            contador = contador + 1
+
+            local args = {
+                [1] = petId,
+                [2] = "Equip",
+                [3] = contador
+            }
+
+            game:GetService("ReplicatedStorage").Remote.ManagePet:FireServer(unpack(args))
         end
 
-        print("Equipping equipDraconic function...")
-        for _, petId in ipairs(draconicTeam) do
+	end)
+end
+
+function equipLucky()
+	spawn(function()
+        local contador = 0
+
+        print("Equipping Lucky team...")
+        for _, petId in ipairs(luckyTeam) do
             task.wait()
             contador = contador + 1
 
@@ -313,11 +364,7 @@ function equipTime()
     spawn(function()
         local contador = 0
 
-        for _, petId in ipairs(timeTeam) do
-            print(petId)
-        end
-
-        print("Executing equipTime function...")
+        print("Equipping Time team...")
         for _, petId in ipairs(timeTeam) do
             task.wait()
             contador = contador + 1
@@ -403,7 +450,7 @@ Section:NewToggle("Multi Open", "Multi Open", function(state)
 end)
 -- Max Open
 getgenv().maxOpen = false
-Section:NewToggle("Max Open", "Max Open", function(state)
+Section:NewToggle("Max Open (auto Lucky/Time team)", "Max Open (auto Lucky/Time team)", function(state)
 	getgenv().maxOpen = state
     if state then
         maxOpen()
@@ -514,6 +561,10 @@ local Section = Tab:NewSection("Saving Teams")
 Section:NewButton("Save Draconic", "Save Draconic", function()
     saveDraconic()
 end)
+-- Equip Lucky team
+Section:NewButton("Save Lucky", "Save Lucky", function()
+    saveLucky()
+end)
 -- Save Time team
 Section:NewButton("Save Time", "Save Time", function()
     saveTime()
@@ -524,11 +575,16 @@ local Section = Tab:NewSection("[DEBUG]")
 Section:NewButton("Equip Draconic", "Equip Draconic", function()
     equipDraconic()
 end)
+-- Equip Lucky team
+Section:NewButton("Equip Lucky", "Equip Lucky", function()
+    equipLucky()
+end)
 -- Equip Time team
 Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
--- TESTE
+
+-- Teleport to Saved Position
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
