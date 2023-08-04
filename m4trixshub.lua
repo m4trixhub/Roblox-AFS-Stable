@@ -51,17 +51,21 @@ function maxOpen()
 	spawn(function()
 		while getgenv().maxOpen do
             local cdMaxOpen = game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Hatch.Buttons.Multi.Price.Text
-            task.wait()
-            if cdMaxOpen == ("0:01" or "MAX") then
+            task.wait(0.1)
+            if cdMaxOpen == "0:00" or cdMaxOpen == "MAX" then
                 if luckyTeam then
                     equipLucky()
+                    print('Time de lucky equipado.')
                 end
                 task.wait(1)
+                print('Tentando roletar.')
                 getgenv().A_1 = eggSelected
                 getgenv().Event = game:GetService("ReplicatedStorage").Remote.AttemptMultiOpen
                 Event:FireServer(A_1)
+                task.wait(1)
                 if timeTeam then
                     equipTime()
+                    task.wait(1.5)
                 end
             end
 		end
@@ -285,7 +289,7 @@ function saveLucky()
             if pet:IsA("Model") then
                 if pet:FindFirstChild("Data") then
                     if tostring(pet.Data.Owner.Value) == player.Name then
-                        table.insert(draconicTeam, pet.Data.UID.Value)
+                        table.insert(luckyTeam, pet.Data.UID.Value)
                         print("The following pet was successfully saved on Lucky team: " .. pet.Name .. ", UID: " .. pet.Data.UID.Value)
                     end
                 end
@@ -434,7 +438,7 @@ end
 --- MAIN
 local Tab = Window:NewTab("MAIN")
 -- Choose Egg
-local Section = Tab:NewSection("Open Stars")
+local Section = Tab:NewSection("Open Stars (AUTO Lucky/Time team)")
 Section:NewDropdown("Select Egg", "Select Egg", eggs, function(currentState)
     getgenv().eggSelected = currentState -- This will print the selected egg when chosen from the dropdown
 end)
@@ -450,7 +454,7 @@ Section:NewToggle("Multi Open", "Multi Open", function(state)
 end)
 -- Max Open
 getgenv().maxOpen = false
-Section:NewToggle("Max Open (auto Lucky/Time team)", "Max Open (auto Lucky/Time team)", function(state)
+Section:NewToggle("Max Open", "Max Open", function(state)
 	getgenv().maxOpen = state
     if state then
         maxOpen()
@@ -583,6 +587,7 @@ end)
 Section:NewButton("Equip Time", "Equip Time", function()
     equipTime()
 end)
+
 
 -- Teleport to Saved Position
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
