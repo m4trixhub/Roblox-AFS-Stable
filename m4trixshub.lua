@@ -93,7 +93,7 @@ function multiOpen()
     spawn(function()
         while getgenv().multiOpen do
             getgenv().A_1 = game:GetService("Workspace").Worlds[currentWorld][eggSelected]
-            getgenv().A_2 = 13
+            getgenv().A_2 = tonumber(string.match(game:GetService("Players").LocalPlayer.PlayerGui.MainGui.Hatch.Buttons.Open.Price.Text, "%d+"))
             getgenv().Event = game:GetService("ReplicatedStorage").Remote.OpenEgg
             Event:InvokeServer(A_1, A_2)
             task.wait(1)
@@ -166,7 +166,7 @@ function autoAttackTP()
                         task.wait(0.5)
                         local enemyPosition = enemy:WaitForChild("HumanoidRootPart", 5).Position
                         local distance = (enemyPosition - playerPosition).Magnitude
-
+                        repeat task.wait() until #enemies ~= nil
                         if distance < 200 and enemy then
                             player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
                             local contador = 1
@@ -184,9 +184,6 @@ function autoAttackTP()
                                     contador = contador + 1
                                 end
                             end
-                        end
-                        if #enemies == nil then
-                            wait(3)
                         end
                     end
                 end)
