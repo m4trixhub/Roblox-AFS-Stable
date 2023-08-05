@@ -1,7 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
 -- LIBRARY SOURCE
-
 getgenv().colors = {
     SchemeColor = Color3.fromRGB(207, 7, 0),
     Background = Color3.fromRGB(0, 0, 0),
@@ -12,6 +11,7 @@ getgenv().colors = {
 getgenv().Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 getgenv().Window = Library.CreateLib("m4trix Hub", colors)
 
+
 -- Alphabetically order a table
 function abc(a, b)
     if a:lower() < b:lower() then
@@ -20,7 +20,8 @@ function abc(a, b)
       return false
     end
 end
-  
+
+
 
 -- Eggs stuff
 local function listItemsWithKeyword(parent, keyword, excludedItem)
@@ -33,7 +34,7 @@ local function listItemsWithKeyword(parent, keyword, excludedItem)
             end
         end
     end
-    
+    table.sort(itemsWithKeyword, abc)
     return itemsWithKeyword
 end
 
@@ -43,23 +44,22 @@ getgenv().currentWorld = game:GetService("Players").LocalPlayer.World.Value
 getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds"):GetChildren()
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"
+getgenv().worldNames = {}
 local timeTeam = {}
 local draconicTeam = {}
 local luckyTeam = {}
-local worldNames = {}
+
 
 for _, world in worlds do
     if world.Name ~= "InfinityTower" and world.Name ~= "Dungeon" and world.Name ~= "Titan" then
         table.insert(worldNames, world.Name)
     end
 end
-
 table.sort(worldNames, abc)
-table.sort(eggs, abc)
+
 
 print("Running...")
 -- FUNCTIONS
-
 function maxOpen()
 	spawn(function()
 		while getgenv().maxOpen do
@@ -112,7 +112,7 @@ end
 function magnetGP()
     spawn(function()
         while getgenv().magnetGP do
-            task.wait(1)
+            task.wait()
             getgenv().workspace = game:GetService("Workspace")
             getgenv().humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
             getgenv().effects = workspace:FindFirstChild("Effects")
