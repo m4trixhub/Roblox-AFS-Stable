@@ -48,11 +48,12 @@ getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6
 getgenv().savedWorld = "TimeChamber"
 getgenv().worldNames = {}
 getgenv().enemiesCurrentWorld = {}
+local enemiesList = {}
 local timeTeam = {}
 local draconicTeam = {}
 local luckyTeam = {}
 local currentTeam = {}
-
+local enemy = nil
 
 for _, world in worlds do
     if world.Name ~= "InfinityTower" and world.Name ~= "Dungeon" and world.Name ~= "Titan" then
@@ -151,46 +152,70 @@ function sprintGP()
 	end)
 end
 
--- AUTO ATTACK 
-function autoAttackTP()
+function searchEnemies()
     spawn(function()
-        while getgenv().autoAttackTP do   
-            local player = game.Players.LocalPlayer
-            local currentWorld = player.World.Value
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
-            local petList = game.Workspace:WaitForChild("Pets"):GetChildren()
-                pcall(function()
-                    local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
-                    for _, enemy in ipairs(enemies) do
-                        task.wait(0.5)
-                        local enemyPosition = enemy:WaitForChild("HumanoidRootPart", 5).Position
-                        local distance = (enemyPosition - playerPosition).Magnitude
-                        repeat task.wait() until #enemies ~= nil
-                        if distance < 200 and enemy then
-                            player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
-                            local contador = 1
-                            print('SENDING PETS TO ATTACK...')
 
-                            for _, pet in ipairs(petList) do
-                                if pet:IsA("Model") and pet:WaitForChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
-                                    local args = {
-                                        [1] = pet,
-                                        [2] = enemy,
-                                        [3] = contador
-                                    }
-                                    sendPetRemote:FireServer(unpack(args))
-                                    pet.Data.Attacking.Value = args[2]
-                                    contador = contador + 1
-                                end
-                            end
-                        end
-                    end
-                end)
-            task.wait() -- Optional delay to control the loop speed
+        local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
+        enemiesList = {}
+        if #enemies then
+            for _, enemy in ipairs(enemies) do
+                task.wait()
+                if enemy:FindFirstChild("HumanoidRootPart") then
+                    print(enemy, "foi inserido em enemiesList")
+                    table.insert(enemiesList, enemy)
+                end
+            end
         end
     end)
 end
+
+-- AUTO ATTACK 
+function autoAttackTP()
+    spawn(function()
+        while getgenv().autoAttackTP do
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local currentWorld = player.World.Value
+                local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
+                local playerPosition = player.Character.HumanoidRootPart.Position
+
+                local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+                local petList = game.Workspace.Pets:GetChildren()
+                
+                for _, enemy in ipairs(enemies) do
+                    local enemyPosition = enemy.HumanoidRootPart.Position
+                    local distance = (enemyPosition - playerPosition).Magnitude
+
+                    if distance < 200 then
+                        player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
+                        local contador = 1
+                        print('SENDING PETS TO ATTACK...')
+
+                        for _, pet in ipairs(petList) do
+                            task.wait()
+                            if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                                local args = {
+                                    [1] = pet,
+                                    [2] = enemy,
+                                    [3] = contador
+                                }
+                                sendPetRemote:FireServer(unpack(args))
+                                pet.Data.Attacking.Value = args[2]
+                                contador = contador + 1
+                            end
+                        end
+                    end
+                    task.wait()
+                end
+            end)
+        end
+    end)
+end
+
+
+
+
+
 
 
 -- AUTO ATTACK EXTRA (Dungeon, Infinity Tower...): more optimized.
@@ -219,7 +244,6 @@ function autoAttackExtra()
                     print('SENDING PETS TO ATTACK...')
 
                     for _, pet in ipairs(equippedPets) do
-                        task.wait()
                         local args = {
                             [1] = pet,
                             [2] = nearestEnemy,
@@ -418,14 +442,14 @@ function infTowerTP()
 			task.wait(5)
 
             if game:GetService("Players").LocalPlayer.World.Value == "InfinityTower" then
-                -- getgenv().autoAttackExtra = true
-                -- autoAttackExtra()
+                getgenv().autoAttackExtra = true
+                autoAttackExtra()
                 while true do
                     print('Waiting for Infinity Tower to end...')
                     task.wait(2)
                     if game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible == true then
-                        -- getgenv().autoAttackExtra = false
-                        task.wait(2)
+                        getgenv().autoAttackExtra = false
+                        task.wait(4)
                         break
                     end
                 end
