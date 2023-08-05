@@ -172,24 +172,20 @@ function autoAttackTP()
     
                     for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
                         task.wait()
-                        if pet:IsA("Model") then
-                            if pet:FindFirstChild("Data") then
-                                if tostring(pet.Data.Owner.Value) == player.Name then
-                                    contador = contador + 1
-                                    local args = {
-                                        [1] = pet,
-                                        [2] = enemyTarget,
-                                        [3] = contador
-                                    }
-                                    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-                                    pet.Data.Attacking.Value = args[2]
-                                end
-                            end
+                        if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                            contador = contador + 1
+                            local args = {
+                                [1] = pet,
+                                [2] = enemyTarget,
+                                [3] = contador
+                            }
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+                            pet.Data.Attacking.Value = args[2]
                         end
                     end
                 end
             end)
-            task.wait(1)
+            task.wait()
         end
     end)
 end
