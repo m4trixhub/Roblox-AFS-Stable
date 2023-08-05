@@ -157,19 +157,18 @@ function autoAttackTP()
         while autoAttackTP do   
             local player = game.Players.LocalPlayer
             local currentWorld = player.World.Value
-            local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
             local playerPosition = player.Character.HumanoidRootPart.Position
             local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
             local petList = game.Workspace:WaitForChild("Pets"):GetChildren()
                 pcall(function()
+                    local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
                     for _, enemy in ipairs(enemies) do
                         task.wait(0.5)
-
-                        local enemyPosition = enemy:WaitForChild("HumanoidRootPart").Position
+                        local enemyPosition = enemy:WaitForChild("HumanoidRootPart", 5).Position
                         local distance = (enemyPosition - playerPosition).Magnitude
 
                         if distance < 200 and enemy then
-                            player.Character.HumanoidRootPart.CFrame = enemy:WaitForChild("PrimaryPart").CFrame
+                            player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
                             local contador = 1
                             print('SENDING PETS TO ATTACK...')
 
@@ -185,6 +184,9 @@ function autoAttackTP()
                                     contador = contador + 1
                                 end
                             end
+                        end
+                        if #enemies == nil then
+                            wait(3)
                         end
                     end
                 end)
