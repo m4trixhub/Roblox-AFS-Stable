@@ -12,8 +12,6 @@ getgenv().colors = {
 getgenv().Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 getgenv().Window = Library.CreateLib("m4trix Hub", colors)
 
--- SEARCH FOR ALL EGGS
-getgenv().worldsParent = game.Workspace.Worlds -- Replace 'Workspace' with the appropriate parent where your "Worlds" parent is located
 
 local function listItemsWithKeyword(parent, keyword, excludedItem)
     getgenv().itemsWithKeyword = {}
@@ -29,24 +27,26 @@ local function listItemsWithKeyword(parent, keyword, excludedItem)
     return itemsWithKeyword
 end
 
-getgenv().keyword = "Egg" -- Change this to the desired keyword you're looking for
-getgenv().excludedItem = "JJBAStoneOceanEgg" -- The item you want to exclude from the results
-getgenv().eggs = listItemsWithKeyword(worldsParent, keyword, excludedItem)
-
--- Now 'itemsWithKeyword' is a list (table) containing the names of the items with the keyword "Egg" but excluding "JJBAStoneOceanEgg".
-
+getgenv().eggs = listItemsWithKeyword(game.Workspace.Worlds, "Egg", "JJBAStoneOceanEgg")
 getgenv().player = game:GetService("Players").LocalPlayer
 getgenv().currentWorld = game:GetService("Players").LocalPlayer.World.Value
-getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds")
+getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds"):GetChildren()
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
-getgenv().savedWorld = "TimeChamber"															-- Default LocalPlayer's world.
+getgenv().savedWorld = "TimeChamber"
 local timeTeam = {}
 local draconicTeam = {}
 local luckyTeam = {}
+local worldNames = {}
+
+for _, world in worlds do
+    if not world.Name ~= "InfinityTower" and world.Name ~= "Dungeon" then
+        table.insert(worldNames, world.Name)
+    end
+end
 
 print("Running...")
-
 -- FUNCTIONS
+
 function maxOpen()
 	spawn(function()
 		while getgenv().maxOpen do
@@ -434,6 +434,16 @@ function infTowerTP()
 	end)
 end
 
+function teleportWorld(worldChoice)
+    spawn(function()
+        local args = {
+            [1] = worldChoice
+        }
+        game:GetService("ReplicatedStorage").Remote.AttemptTravel:InvokeServer(unpack(args))
+        task.wait(0.5)
+        player.Character.HumanoidRootPart.CFrame = workspace.Worlds[worldChoice].Spawns:WaitForChild("SpawnLocation").CFrame      
+    end)
+end
 
 --- MAIN
 local Tab = Window:NewTab("MAIN")
@@ -577,6 +587,16 @@ Section:NewButton("Save Time", "Save Time", function()
     saveTime()
 end)
 
+--- TELEPORT
+local Tab = Window:NewTab("TELEPORT")
+local Section = Tab:NewSection("Select World")
+Section:NewDropdown("World list", "World list", worldNames, function(currentState)
+    getgenv().worldSelected = currentState -- This will     print the selected egg when chosen from the dropdown
+end)
+Section:NewButton("TELEPORT", "TELEPORT", function()
+    teleportWorld(worldSelected)
+end)
+
 --- DEBUG
 local Tab = Window:NewTab("[DEBUG]")
 local Section = Tab:NewSection("[DEBUG]")
@@ -596,3 +616,4 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
