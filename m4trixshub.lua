@@ -161,11 +161,12 @@ function autoAttackTP()
                     enemyTarget = enemy
                     break
                 end
-                player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
+                
                 local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
                 local enemyPosition = enemyTarget.HumanoidRootPart.Position
                 local distance = (enemyPosition - playerPosition).Magnitude
                 if enemyTarget and distance < 200 then
+                    player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
                     currentWorld = game:GetService("Players").LocalPlayer.World.Value
                     local contador = 1
                     print('SENDING PETS TO ATTACK...')
