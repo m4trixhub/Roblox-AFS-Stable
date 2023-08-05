@@ -154,43 +154,41 @@ end
 -- AUTO ATTACK 
 function autoAttackTP()
     spawn(function()
-        while autoAttackTP do
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local currentWorld = player.World.Value
-                local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
-                local playerPosition = player.Character.HumanoidRootPart.Position
-                local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
-                local petList = game.Workspace:WaitForChild("Pets"):GetChildren()
-                
-                for _, enemy in ipairs(enemies) do
-                    task.wait()
+        while autoAttackTP do   
+            local player = game.Players.LocalPlayer
+            local currentWorld = player.World.Value
+            local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+            local petList = game.Workspace:WaitForChild("Pets"):GetChildren()
+                pcall(function()
+                    for _, enemy in ipairs(enemies) do
+                        task.wait(0.5)
 
-                    local enemyPosition = enemy:WaitForChild("HumanoidRootPart").Position
-                    local distance = (enemyPosition - playerPosition).Magnitude
+                        local enemyPosition = enemy:WaitForChild("HumanoidRootPart").Position
+                        local distance = (enemyPosition - playerPosition).Magnitude
 
-                    if distance < 200 and enemy then
-                        player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
-                        local contador = 1
-                        print('SENDING PETS TO ATTACK...')
+                        if distance < 200 and enemy then
+                            player.Character.HumanoidRootPart.CFrame = enemy:WaitForChild("PrimaryPart").CFrame
+                            local contador = 1
+                            print('SENDING PETS TO ATTACK...')
 
-                        for _, pet in ipairs(petList) do
-                            if pet:IsA("Model") and pet:WaitForChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
-                                local args = {
-                                    [1] = pet,
-                                    [2] = enemy,
-                                    [3] = contador
-                                }
-                                sendPetRemote:FireServer(unpack(args))
-                                pet.Data.Attacking.Value = args[2]
-                                contador = contador + 1
+                            for _, pet in ipairs(petList) do
+                                if pet:IsA("Model") and pet:WaitForChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                                    local args = {
+                                        [1] = pet,
+                                        [2] = enemy,
+                                        [3] = contador
+                                    }
+                                    sendPetRemote:FireServer(unpack(args))
+                                    pet.Data.Attacking.Value = args[2]
+                                    contador = contador + 1
+                                end
                             end
                         end
-
                     end
-                end
-                task.wait() -- Optional delay to control the loop speed
-            end)
+                end)
+            task.wait() -- Optional delay to control the loop speed
         end
     end)
 end
