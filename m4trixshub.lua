@@ -9,6 +9,8 @@ getgenv().colors = {
     ElementColor = Color3.fromRGB(77, 77, 77)
 }
 getgenv().Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+
 getgenv().Window = Library.CreateLib("m4trix Hub", colors)
 
 
@@ -153,43 +155,84 @@ end
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
-            currentWorld = game:GetService("Players").LocalPlayer.World.Value
-            local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
-            pcall(function()
-                for _, enemy in ipairs(enemies) do
-                    task.wait()
-                    enemyTarget = enemy
-                    break
+            local player = game:GetService("Players").LocalPlayer
+            local currentWorld = player.World.Value
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            
+            local equippedPets = {}
+            for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+                task.wait()
+                if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                    table.insert(equippedPets, pet)
                 end
-                
-                local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+            end
+
+            for _, enemy in ipairs(workspace.Worlds[currentWorld].Enemies:GetChildren()) do
+                local enemyTarget = enemy
                 local enemyPosition = enemyTarget.HumanoidRootPart.Position
                 local distance = (enemyPosition - playerPosition).Magnitude
-                if enemyTarget and distance < 200 then
+                if distance < 200 then
                     player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
-                    currentWorld = game:GetService("Players").LocalPlayer.World.Value
                     local contador = 1
                     print('SENDING PETS TO ATTACK...')
-    
-                    for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
-                        task.wait()
-                        if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
-                            contador = contador + 1
-                            local args = {
-                                [1] = pet,
-                                [2] = enemyTarget,
-                                [3] = contador
-                            }
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-                            pet.Data.Attacking.Value = args[2]
-                        end
+
+                    for _, pet in ipairs(equippedPets) do
+                        local args = {
+                            [1] = pet,
+                            [2] = enemyTarget,
+                            [3] = contador
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+                        pet.Data.Attacking.Value = args[2]
+                        contador = contador + 1
                     end
                 end
-            end)
-            task.wait()
+            end
         end
     end)
 end
+
+-- AUTO ATTACK EXTRA (Dungeon, Infinity Tower...): more optimized.
+function autoAttackExtra()
+    spawn(function()
+        while getgenv().autoAttackExtra do
+            local player = game:GetService("Players").LocalPlayer
+            local currentWorld = player.World.Value
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            
+            local equippedPets = {}
+            for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+                task.wait()
+                if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                    table.insert(equippedPets, pet)
+                end
+            end
+
+            local nearestEnemy = workspace.Worlds[currentWorld].Enemies:GetChildren()[1]
+            if nearestEnemy then
+                local enemyPosition = nearestEnemy.HumanoidRootPart.Position
+                local distance = (enemyPosition - playerPosition).Magnitude
+                if distance < 200 then
+                    player.Character.HumanoidRootPart.CFrame = nearestEnemy.PrimaryPart.CFrame 
+                    local contador = 1
+                    print('SENDING PETS TO ATTACK...')
+
+                    for _, pet in ipairs(equippedPets) do
+                        local args = {
+                            [1] = pet,
+                            [2] = nearestEnemy,
+                            [3] = contador
+                        }
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+                        pet.Data.Attacking.Value = args[2]
+                        contador = contador + 1
+                    end
+                end
+            end
+        end
+    end)
+end
+
 
 
 
@@ -373,10 +416,14 @@ function infTowerTP()
 			task.wait(5)
 
             if game:GetService("Players").LocalPlayer.World.Value == "InfinityTower" then
+                getgenv().autoAttackExtra = true
+                autoAttackExtra()
                 while true do
                     print('Waiting for Infinity Tower to end...')
                     task.wait(2)
                     if game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible == true then
+                        getgenv().autoAttackExtra = false
+                        wait(2)
                         break
                     end
                 end
@@ -542,11 +589,11 @@ Section:NewButton("Teleport", "Teleport", function()
 end)
 
 --- Zer0hub FIX
-local Tab = Window:NewTab("Zer0hub Fix")
+local Tab = Window:NewTab("EXTRA MODES")
 local Section = Tab:NewSection("Infinity Tower")
 -- Auto Infinity Tower TP
 getgenv().infTowerTP = false
-Section:NewToggle("Auto Infinity Tower TP", "Auto Infinity Tower TP", function(state)
+Section:NewToggle("Auto Infinity Tower", "Auto Infinity Tower", function(state)
 	getgenv().infTowerTP = state
     if state then
         infTowerTP()
