@@ -154,43 +154,45 @@ end
 -- AUTO ATTACK 
 function autoAttackTP()
     spawn(function()
-        while getgenv().autoAttackTP do
-            local player = game:GetService("Players").LocalPlayer
+        while autoAttackTP do
+            local player = game.Players.LocalPlayer
             local currentWorld = player.World.Value
+            local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
             local playerPosition = player.Character.HumanoidRootPart.Position
+            local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+            local petList = game.Workspace:WaitForChild("Pets"):GetChildren()
             
-            local equippedPets = {}
-            for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+            for _, enemy in ipairs(enemies) do
                 task.wait()
-                if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
-                    table.insert(equippedPets, pet)
-                end
-            end
 
-            for _, enemy in ipairs(workspace.Worlds[currentWorld].Enemies:GetChildren()) do
-                local enemyTarget = enemy
-                local enemyPosition = enemyTarget.HumanoidRootPart.Position
+                local enemyPosition = enemy:WaitForChild("HumanoidRootPart").Position
                 local distance = (enemyPosition - playerPosition).Magnitude
-                if distance < 200 then
-                    player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
+
+                if distance < 200 and enemy then
+                    player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
                     local contador = 1
                     print('SENDING PETS TO ATTACK...')
 
-                    for _, pet in ipairs(equippedPets) do
-                        local args = {
-                            [1] = pet,
-                            [2] = enemyTarget,
-                            [3] = contador
-                        }
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-                        pet.Data.Attacking.Value = args[2]
-                        contador = contador + 1
+                    for _, pet in ipairs(petList) do
+                        if pet:IsA("Model") and pet:WaitForChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                            local args = {
+                                [1] = pet,
+                                [2] = enemy,
+                                [3] = contador
+                            }
+                            sendPetRemote:FireServer(unpack(args))
+                            pet.Data.Attacking.Value = args[2]
+                            contador = contador + 1
+                        end
                     end
+
                 end
             end
+            task.wait() -- Optional delay to control the loop speed
         end
     end)
 end
+
 
 -- AUTO ATTACK EXTRA (Dungeon, Infinity Tower...): more optimized.
 function autoAttackExtra()
@@ -218,6 +220,7 @@ function autoAttackExtra()
                     print('SENDING PETS TO ATTACK...')
 
                     for _, pet in ipairs(equippedPets) do
+                        task.wait()
                         local args = {
                             [1] = pet,
                             [2] = nearestEnemy,
@@ -416,14 +419,14 @@ function infTowerTP()
 			task.wait(5)
 
             if game:GetService("Players").LocalPlayer.World.Value == "InfinityTower" then
-                getgenv().autoAttackExtra = true
-                autoAttackExtra()
+                -- getgenv().autoAttackExtra = true
+                -- autoAttackExtra()
                 while true do
                     print('Waiting for Infinity Tower to end...')
                     task.wait(2)
                     if game:GetService("Players").LocalPlayer.PlayerGui.MainGui:WaitForChild("InfinityTowerLose").Visible == true then
-                        getgenv().autoAttackExtra = false
-                        wait(2)
+                        -- getgenv().autoAttackExtra = false
+                        task.wait(2)
                         break
                     end
                 end
@@ -446,7 +449,7 @@ function infTowerTP()
                     game:GetService("ReplicatedStorage").Remote:WaitForChild("JoinInfinityTower"):FireServer(unpack(args))	-- Teleports LocalPlayer to Infinity Tower.
                     game:GetService("ReplicatedStorage"):WaitForChild("Bindable").AttemptTravel:Fire("InfinityTower", true)	--
                     print('------------------- INFINITY TOWER STARTED! --------------------')
-
+                    task.wait(3)
                     if draconicTeam then
                         print('----------------------- EQUIPPING DRACONIC TEAM -----------------------')
                         equipDraconic()
