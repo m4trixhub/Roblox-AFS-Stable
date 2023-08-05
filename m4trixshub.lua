@@ -156,11 +156,16 @@ function autoAttackTP()
             currentWorld = game:GetService("Players").LocalPlayer.World.Value
             local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
             for _, enemy in ipairs(enemies) do
+                task.wait()
                 enemyTarget = enemy
                 break
             end
 
-            if enemyTarget then
+            local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+            local enemyPosition = enemyTarget.HumanoidRootPart.Position
+            local distance = (enemyPosition - playerPosition).Magnitude
+
+            if enemyTarget and distance < 200 then
                 currentWorld = game:GetService("Players").LocalPlayer.World.Value
                 player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
                 local contador = 1
@@ -183,8 +188,8 @@ function autoAttackTP()
                         end
                     end
                 end
-                repeat wait() until not enemyTarget
             end
+
         end
     end)
 end
@@ -451,8 +456,8 @@ Section:NewToggle("Max Open", "Max Open", function(state)
     end
 end)
 
--- Auto Attack
-local Section = Tab:NewSection("Auto Farm")
+-- Auto Attack (TP)
+local Section = Tab:NewSection("Auto Farm (TP)")
 getgenv().autoAttackTP = false
 Section:NewToggle("Auto Attack", "Auto Attack", function(state)
 	getgenv().autoAttackTP = state
