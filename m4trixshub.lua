@@ -12,7 +12,17 @@ getgenv().colors = {
 getgenv().Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 getgenv().Window = Library.CreateLib("m4trix Hub", colors)
 
+-- Alphabetically order a table
+function abc(a, b)
+    if a:lower() < b:lower() then
+      return true
+    else
+      return false
+    end
+end
+  
 
+-- Eggs stuff
 local function listItemsWithKeyword(parent, keyword, excludedItem)
     getgenv().itemsWithKeyword = {}
     
@@ -39,10 +49,13 @@ local luckyTeam = {}
 local worldNames = {}
 
 for _, world in worlds do
-    if not world.Name ~= "InfinityTower" and world.Name ~= "Dungeon" then
+    if world.Name ~= "InfinityTower" and world.Name ~= "Dungeon" and world.Name ~= "Titan" then
         table.insert(worldNames, world.Name)
     end
 end
+
+table.sort(worldNames, abc)
+table.sort(eggs, abc)
 
 print("Running...")
 -- FUNCTIONS
@@ -552,6 +565,14 @@ Section:NewToggle("Daily Spin", "Daily Spin", function(state)
         print("Toggle Off")
     end
 end)
+-- Teleport Worlds
+local Section = Tab:NewSection("TP")
+Section:NewDropdown("Worlds", "Worlds", worldNames, function(currentState)
+    getgenv().worldSelected = currentState -- This will     print the selected egg when chosen from the dropdown
+end)
+Section:NewButton("Teleport", "Teleport", function()
+    teleportWorld(worldSelected)
+end)
 
 --- Zer0hub FIX
 local Tab = Window:NewTab("Zer0hub Fix")
@@ -571,7 +592,7 @@ Section:NewButton("Save Position", "Save Position", function()
     savePosition()
 end)
 
---- TEAMS
+--- Teams
 local Tab = Window:NewTab("TEAMS")
 local Section = Tab:NewSection("Save Team")
 -- Save Draconic team
@@ -587,17 +608,9 @@ Section:NewButton("Save Time", "Save Time", function()
     saveTime()
 end)
 
---- TELEPORT
-local Tab = Window:NewTab("TELEPORT")
-local Section = Tab:NewSection("Select World")
-Section:NewDropdown("World list", "World list", worldNames, function(currentState)
-    getgenv().worldSelected = currentState -- This will     print the selected egg when chosen from the dropdown
-end)
-Section:NewButton("TELEPORT", "TELEPORT", function()
-    teleportWorld(worldSelected)
-end)
 
---- DEBUG
+
+--- [DEBUG]
 local Tab = Window:NewTab("[DEBUG]")
 local Section = Tab:NewSection("[DEBUG]")
 -- Equip Draconic team
