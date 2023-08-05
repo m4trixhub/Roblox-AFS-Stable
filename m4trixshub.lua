@@ -134,7 +134,7 @@ end
 function autoClickGP()
 	spawn(function()
 		while getgenv().autoClickGP do
-            task.wait(0.025)
+            task.wait()
             game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("ClickerDamage"):FireServer()
 		end
 	end)
@@ -154,7 +154,7 @@ end
 -- AUTO ATTACK 
 function autoAttackTP()
     spawn(function()
-        while autoAttackTP do   
+        while getgenv().autoAttackTP do   
             local player = game.Players.LocalPlayer
             local currentWorld = player.World.Value
             local playerPosition = player.Character.HumanoidRootPart.Position
