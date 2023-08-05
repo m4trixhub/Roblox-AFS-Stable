@@ -155,41 +155,41 @@ function autoAttackTP()
         while getgenv().autoAttackTP do
             currentWorld = game:GetService("Players").LocalPlayer.World.Value
             local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
-            for _, enemy in ipairs(enemies) do
-                task.wait()
-                enemyTarget = enemy
-                break
-            end
-
-            local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
-            local enemyPosition = enemyTarget.HumanoidRootPart.Position
-            local distance = (enemyPosition - playerPosition).Magnitude
-
-            if enemyTarget and distance < 200 then
-                currentWorld = game:GetService("Players").LocalPlayer.World.Value
-                player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
-                local contador = 1
-
-                print('======== SENDING PETS TO ATTACK... =========')
-                for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+            pcall(function()
+                for _, enemy in ipairs(enemies) do
                     task.wait()
-                    if pet:IsA("Model") then
-                        if pet:FindFirstChild("Data") then
-                            if tostring(pet.Data.Owner.Value) == player.Name then
-                                contador = contador + 1
-                                local args = {
-                                    [1] = pet,
-                                    [2] = enemyTarget,
-                                    [3] = contador
-                                }
-                                game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-                                pet.Data.Attacking.Value = args[2]
+                    enemyTarget = enemy
+                    break
+                end
+                player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
+                local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
+                local enemyPosition = enemyTarget.HumanoidRootPart.Position
+                local distance = (enemyPosition - playerPosition).Magnitude
+                if enemyTarget and distance < 200 do
+                    currentWorld = game:GetService("Players").LocalPlayer.World.Value
+                    local contador = 1
+                    print('SENDING PETS TO ATTACK...')
+    
+                    for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+                        task.wait()
+                        if pet:IsA("Model") then
+                            if pet:FindFirstChild("Data") then
+                                if tostring(pet.Data.Owner.Value) == player.Name then
+                                    contador = contador + 1
+                                    local args = {
+                                        [1] = pet,
+                                        [2] = enemyTarget,
+                                        [3] = contador
+                                    }
+                                    game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+                                    pet.Data.Attacking.Value = args[2]
+                                end
                             end
                         end
                     end
                 end
-            end
-
+            end)
+            task.wait(1)
         end
     end)
 end
@@ -457,9 +457,9 @@ Section:NewToggle("Max Open", "Max Open", function(state)
 end)
 
 -- Auto Attack (TP)
-local Section = Tab:NewSection("Auto Farm (TP)")
+local Section = Tab:NewSection("Auto Farm")
 getgenv().autoAttackTP = false
-Section:NewToggle("Auto Attack", "Auto Attack", function(state)
+Section:NewToggle("Auto Attack (TP)", "Auto Attack (TP)", function(state)
 	getgenv().autoAttackTP = state
     if state then
         autoAttackTP()
@@ -599,4 +599,3 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
-
