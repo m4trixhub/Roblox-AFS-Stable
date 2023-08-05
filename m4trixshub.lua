@@ -165,7 +165,7 @@ function autoAttackTP()
                 local playerPosition = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position
                 local enemyPosition = enemyTarget.HumanoidRootPart.Position
                 local distance = (enemyPosition - playerPosition).Magnitude
-                if enemyTarget and distance < 200 do
+                if enemyTarget and distance < 200 then
                     currentWorld = game:GetService("Players").LocalPlayer.World.Value
                     local contador = 1
                     print('SENDING PETS TO ATTACK...')
@@ -599,3 +599,4 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
