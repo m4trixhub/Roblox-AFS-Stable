@@ -45,9 +45,11 @@ getgenv().worlds = game:GetService("Workspace"):WaitForChild("Worlds"):GetChildr
 getgenv().savedPosition = Vector3.new(-4811.17041015625, -195.75247192382812, -6423.1240234375) -- Default LocalPlayer's Cframe.
 getgenv().savedWorld = "TimeChamber"
 getgenv().worldNames = {}
+getgenv().enemiesCurrentWorld = {}
 local timeTeam = {}
 local draconicTeam = {}
 local luckyTeam = {}
+local currentTeam = {}
 
 
 for _, world in worlds do
@@ -147,83 +149,46 @@ function sprintGP()
 	end)
 end
 
-
-function autoAttackGP()
+-- AUTO ATTACK 
+function autoAttackTP()
     spawn(function()
-        while getgenv().autoAttackGP do
-			getgenv().enemies = workspace:WaitForChild("Worlds"):WaitForChild(currentWorld):WaitForChild("Enemies")
-			getgenv().playerBody = player.Character:FindFirstChild("HumanoidRootPart")
-			getgenv().playerName = player.Name
-			local distance
-			local closestEnemy
-			
-			for _, enemy in ipairs(enemies:GetChildren()) do
-				task.wait()
-				distance = ((enemy.HumanoidRootPart.Position or enemy.PrimaryPart.Position) - playerBody.Position).magnitude
-				if distance < 20 then
-					closestEnemy = enemy
-					break
-				end
-			end
-			while closestEnemy and (distance < 20) do
-				distance = ((closestEnemy.HumanoidRootPart.Position or closestEnemy.PrimaryPart.Position) - playerBody.Position).magnitude
-				contador = 0
-				if contador == 0 then
-					print("Sending pets to attack", closestEnemy.Name)
-				end
-				
-				local myPets = game:GetService("Players").LocalPlayer.Pets:GetChildren()
-				local allPets = workspace:WaitForChild("Pets"):GetChildren()
+        while getgenv().autoAttackTP do
+            currentWorld = game:GetService("Players").LocalPlayer.World.Value
+            local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
+            for _, enemy in ipairs(enemies) do
+                enemyTarget = enemy
+                break
+            end
 
-				local petModels = {} -- Table to store the model paths
+            if enemyTarget then
+                currentWorld = game:GetService("Players").LocalPlayer.World.Value
+                player.Character.HumanoidRootPart.CFrame = enemyTarget.PrimaryPart.CFrame 
+                local contador = 1
 
-				-- Find and store the model paths in the petModels table
-				for _, myPet in ipairs(myPets) do
-					local myPetName = myPet.Name
-					for _, petModel in ipairs(allPets) do
-						if petModel:IsA("Model") and petModel.Name == myPetName then
-							table.insert(petModels, petModel:GetFullName())
-							print('petModel added:', petModel.Name)
-						end
-						task.wait()
-					end
-				end
-
-
-				-- Modify each model using the stored paths
-				for _, petPath in ipairs(petModels) do
-					local petModel = workspace:FindFirstChild(petPath)
-					print('tentou atacar!')
-					contador = contador + 1
-					local args = {
-						[1] = petPath,
-						[2] = enemies:WaitForChild(closestEnemy.Name),
-						[3] = contador
-					}
-					print('chegou')
-					print(unpack(args))
-					game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-					petPath.Data.Attacking.Value = args[2]
-					print("Modifying:", petModel.Name)
-					task.wait()
-				end
-				
-				
-				if not getgenv().autoAttackGP then
-					for _, pet in ipairs(myPets) do
-						local args = {
-							[1] = workspace:WaitForChild("Pets"):WaitForChild(pet.Name),
-						}
-						game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
-						game:GetService("Workspace").Pets[pet.Name].Data.Attacking.Value = nill
-					end
-					break
-				end
-				task.wait() -- Adjust the delay before the next iteration
-			end
-		end
-	end)
+                print('======== SENDING PETS TO ATTACK... =========')
+                for _, pet in ipairs(game:GetService("Workspace").Pets:GetChildren()) do
+                    task.wait()
+                    if pet:IsA("Model") then
+                        if pet:FindFirstChild("Data") then
+                            if tostring(pet.Data.Owner.Value) == player.Name then
+                                contador = contador + 1
+                                local args = {
+                                    [1] = pet,
+                                    [2] = enemyTarget,
+                                    [3] = contador
+                                }
+                                game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet"):FireServer(unpack(args))
+                                pet.Data.Attacking.Value = args[2]
+                            end
+                        end
+                    end
+                end
+                repeat wait() until not enemyTarget
+            end
+        end
+    end)
 end
+
 
 
 function dailySpin()
@@ -488,11 +453,11 @@ end)
 
 -- Auto Attack
 local Section = Tab:NewSection("Auto Farm")
-getgenv().autoAttackGP = false
+getgenv().autoAttackTP = false
 Section:NewToggle("Auto Attack", "Auto Attack", function(state)
-	getgenv().autoAttackGP = state
+	getgenv().autoAttackTP = state
     if state then
-        autoAttackGP()
+        autoAttackTP()
     else
         print("Toggle Off")
     end
