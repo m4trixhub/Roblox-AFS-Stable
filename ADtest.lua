@@ -37,7 +37,7 @@ StateText.Size = UDim2.new(0.705811679, 0, 0.300000012, 0)
 StateText.Font = Enum.Font.SourceSansBold
 StateText.Text = "Searching..."
 StateText.TextColor3 = Color3.fromRGB(255, 255, 255)
-StateText.TextSize = 100.000
+StateText.TextSize = 80.000
 StateText.TextStrokeTransparency = 0.600
 
 CreditText.Name = "CreditText"
@@ -51,7 +51,7 @@ CreditText.Size = UDim2.new(0.278289944, 0, 0.130827099, 0)
 CreditText.Font = Enum.Font.SourceSans
 CreditText.Text = "m4trixhub"
 CreditText.TextColor3 = Color3.fromRGB(255, 85, 0)
-CreditText.TextSize = 40.000
+CreditText.TextSize = 20.000
 CreditText.TextStrokeTransparency = 0.600
 -- FIM DO GUI
 
