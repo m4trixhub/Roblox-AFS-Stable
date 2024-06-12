@@ -65,6 +65,8 @@ getgenv().searching = true
 
 while searching do 
     for _, booth in pairs(workspace.Folder:GetChildren()) do
+	
+		task.wait(0.2)
         if booth:FindFirstChild("PromptHolderPart") and booth.PromptHolderPart:FindFirstChild("BoothInteractPrompt") then
 
             local prompt = booth.PromptHolderPart.BoothInteractPrompt
