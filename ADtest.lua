@@ -1,4 +1,6 @@
-// INICIO DO GUI
+repeat task.wait() until game:IsLoaded()
+
+-- INICIO DO GUI
 
 local ScreenGui = Instance.new("ScreenGui")
 local TradeHopGUI = Instance.new("Frame")
@@ -53,32 +55,28 @@ CreditText.TextColor3 = Color3.fromRGB(255, 85, 0)
 CreditText.TextSize = 40.000
 CreditText.TextStrokeTransparency = 0.600
 
-// FIM DO GUI
+-- FIM DO GUI
+
 
 local player = game.Players.LocalPlayer.Character.HumanoidRootPart
-local closeButton = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.PlayerBoothUI:WaitForChild("CloseButton")
+local closeButton = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.PlayerBoothUI.CloseButton
 
 getgenv().searching = true
 
 while searching do 
     for _, booth in pairs(workspace.Folder:GetChildren()) do
+	
+		task.wait(0.2)
         if booth:FindFirstChild("PromptHolderPart") and booth.PromptHolderPart:FindFirstChild("BoothInteractPrompt") then
 
             local prompt = booth.PromptHolderPart.BoothInteractPrompt
             prompt.MaxActivationDistance = 200
             task.wait(0.3)
-            
-            // Verificar se a função fireproximityprompt existe antes de chamar
-            if typeof(fireproximityprompt) == "function" then
-                fireproximityprompt(prompt)
-            else
-                warn("fireproximityprompt function does not exist.")
-            end
-            
+            fireproximityprompt(prompt)
             task.wait(1)
             for _, unit in pairs(game:GetService("Players").LocalPlayer.PlayerGui.PAGES.PlayerBoothUI.BoothUIScrollingFrame:GetChildren()) do
                 task.wait(0.15)
-                if unit:FindFirstChild("UnitGridPrefab") and unit.UnitGridPrefab:FindFirstChild("Button") and unit.UnitGridPrefab.Button:FindFirstChild("UnitNameLabel") then
+                if unit.UnitGridPrefab and unit.UnitGridPrefab.Button and unit.UnitGridPrefab.Button.UnitNameLabel
                     local unitName = unit.UnitGridPrefab.Button.UnitNameLabel.Text
                     if unitName == "Chance Taker" or
                         unitName == "The Gamer" or
@@ -86,26 +84,26 @@ while searching do
                         unitName == "★ Chance King" then
                         
                         local priceUnitStr = unit.UnitGridPrefab.OnSaleFrame.TextLabel.Text
-                        local priceUnitInt = tonumber(priceUnitStr:gsub(",", ""))
+                        local priceUnitInt = tonumber(str:gsub(",", ""))
                                               
+                       
                         if priceUnitInt < 120000 then
+                      
                             StateText.Text = "FOUND!"
                             searching = false
                             break
+							
                         end
                     end
                 end
             end
-            
-            // Verificar se a função fireclickdetector existe antes de chamar
-            if typeof(fireclickdetector) == "function" then
-                fireclickdetector(closeButton)
-            else
-                warn("fireclickdetector function does not exist.")
-            end
+            fireclickdetector(closeButton)
         end
     end
+	print("Nada encontrado!")
     
-    // CHANGE SERVER LOGIC HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    --
+    -- CHANGE SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    --
     
 end
