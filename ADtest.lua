@@ -1,7 +1,6 @@
 repeat task.wait() until game:IsLoaded()
 
 -- INICIO DO GUI
-
 local ScreenGui = Instance.new("ScreenGui")
 local TradeHopGUI = Instance.new("Frame")
 local Frame = Instance.new("Frame")
@@ -54,9 +53,7 @@ CreditText.Text = "m4trixhub"
 CreditText.TextColor3 = Color3.fromRGB(255, 85, 0)
 CreditText.TextSize = 40.000
 CreditText.TextStrokeTransparency = 0.600
-
 -- FIM DO GUI
-
 
 local player = game.Players.LocalPlayer.Character.HumanoidRootPart
 local closeButton = game:GetService("Players").LocalPlayer.PlayerGui.PAGES.PlayerBoothUI.CloseButton
@@ -65,10 +62,8 @@ getgenv().searching = true
 
 while searching do 
     for _, booth in pairs(workspace.Folder:GetChildren()) do
-	
-		task.wait(0.2)
+        task.wait(0.2)
         if booth:FindFirstChild("PromptHolderPart") and booth.PromptHolderPart:FindFirstChild("BoothInteractPrompt") then
-
             local prompt = booth.PromptHolderPart.BoothInteractPrompt
             prompt.MaxActivationDistance = 200
             task.wait(0.3)
@@ -76,7 +71,7 @@ while searching do
             task.wait(1)
             for _, unit in pairs(game:GetService("Players").LocalPlayer.PlayerGui.PAGES.PlayerBoothUI.BoothUIScrollingFrame:GetChildren()) do
                 task.wait(0.15)
-                if unit.UnitGridPrefab and unit.UnitGridPrefab.Button and unit.UnitGridPrefab.Button.UnitNameLabel
+                if unit:FindFirstChild("UnitGridPrefab") and unit.UnitGridPrefab:FindFirstChild("Button") and unit.UnitGridPrefab.Button:FindFirstChild("UnitNameLabel") then
                     local unitName = unit.UnitGridPrefab.Button.UnitNameLabel.Text
                     if unitName == "Chance Taker" or
                         unitName == "The Gamer" or
@@ -84,15 +79,12 @@ while searching do
                         unitName == "★ Chance King" then
                         
                         local priceUnitStr = unit.UnitGridPrefab.OnSaleFrame.TextLabel.Text
-                        local priceUnitInt = tonumber(str:gsub(",", ""))
+                        local priceUnitInt = tonumber(priceUnitStr:gsub(",", ""))
                                               
-                       
                         if priceUnitInt < 120000 then
-                      
                             StateText.Text = "FOUND!"
                             searching = false
                             break
-							
                         end
                     end
                 end
@@ -100,10 +92,7 @@ while searching do
             fireclickdetector(closeButton)
         end
     end
-	print("Nada encontrado!")
+    print("Nada encontrado!")
     
-    --
-    -- CHANGE SERVER !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    --
-    
+    -- CHANGE SERVER LOGIC HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 end
