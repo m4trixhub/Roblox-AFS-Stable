@@ -225,53 +225,31 @@ local function getAnyClosestEnemy()
     return closest
 end
 
-local function GetNil(Name, DebugId)
-    for _, Object in getnilinstances() do
-        if Object.Name == Name and Object:GetDebugId() == DebugId then
-            return Object
-        end
-    end
-end
-
-
 function autoAttackTP()
-    task.spawn(function()
-        local Players = game:GetService("Players")
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-        local player = Players.LocalPlayer
-        local sendPet = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("SendPet")
-        local clickRemote = ReplicatedStorage:WaitForChild("Remote"):WaitForChild("ClickerDamage")
-
+    spawn(function()
         while getgenv().autoAttackTP do
             pcall(function()
 
-                local char = player.Character
-                if not char then return end
+                local player = game.Players.LocalPlayer
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-                local hrp = char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
+                local hrp = player.Character.HumanoidRootPart
                 local currentWorld = player.World.Value
-                local worldFolder = workspace:WaitForChild("Worlds"):FindFirstChild(currentWorld)
-                if not worldFolder then return end
-
-                local enemiesFolder = worldFolder:FindFirstChild("Enemies")
+                local enemiesFolder = workspace.Worlds[currentWorld]:FindFirstChild("Enemies")
                 if not enemiesFolder then return end
 
+                local sendPet = game.ReplicatedStorage.Remote:WaitForChild("SendPet")
+                local clickRemote = game.ReplicatedStorage.Remote:WaitForChild("ClickerDamage")
+
                 --------------------------------------------------
-                -- INIMIGO MAIS PRÓXIMO VIVO
+                -- INIMIGO MAIS PRÓXIMO
                 --------------------------------------------------
-                local nearestEnemy
-                local shortestDistance = 200
+                local nearestEnemy = nil
+                local shortestDistance = math.huge
 
                 for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                    local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
-                    local health = enemy:FindFirstChild("Health")
-                        or (enemy:FindFirstChild("Data") and enemy.Data:FindFirstChild("Health"))
-
-                    if enemyRoot and health and health.Value > 0 then
-                        local distance = (enemyRoot.Position - hrp.Position).Magnitude
+                    if enemy:FindFirstChild("HumanoidRootPart") then
+                        local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
                         if distance < shortestDistance then
                             shortestDistance = distance
                             nearestEnemy = enemy
@@ -279,54 +257,58 @@ function autoAttackTP()
                     end
                 end
 
-                if not nearestEnemy then return end
+                if not nearestEnemy then
+                    print("Nenhum inimigo encontrado")
+                    return
+                end
 
-                local targetRoot = nearestEnemy:FindFirstChild("HumanoidRootPart")
-                if not targetRoot then return end
-
-                --------------------------------------------------
-                -- TELEPORTA LEVEMENTE ATRÁS
-                --------------------------------------------------
-                hrp.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -3)
-                task.wait(0.25)
+                print("Alvo:", nearestEnemy.Name)
 
                 --------------------------------------------------
-                -- ENVIA PETS
+                -- TELEPORTA
+                --------------------------------------------------
+                hrp.CFrame = nearestEnemy.HumanoidRootPart.CFrame
+
+                --------------------------------------------------
+                -- PEGA PETS REAIS (MODELS)
                 --------------------------------------------------
                 local petsFolder = workspace:FindFirstChild("Pets")
                 if not petsFolder then return end
 
-                local slot = 1
+                local contador = 1
 
                 for _, pet in ipairs(petsFolder:GetChildren()) do
-                    if pet:IsA("Model")
-                    and pet:FindFirstChild("Data")
-                    and tostring(pet.Data.Owner.Value) == player.Name then
+                    if pet:IsA("Model") and pet:FindFirstChild("Data") then
+                        if tostring(pet.Data.Owner.Value) == player.Name then
 
-                        sendPet:FireServer(pet, nearestEnemy, slot)
-                        slot += 1
-                        task.wait(0.05)
+                            print("Enviando pet:", pet.Name)
+
+                            sendPet:FireServer(
+                                pet,
+                                nearestEnemy,
+                                contador
+                            )
+
+                            contador += 1
+                        end
                     end
                 end
 
                 --------------------------------------------------
-                -- CLICK ATÉ MORRER (COM VALIDAÇÃO DE VIDA)
+                -- ESPERA MORRER
                 --------------------------------------------------
-                while getgenv().autoAttackTP do
-                    local health = nearestEnemy:FindFirstChild("Health")
-                        or (nearestEnemy:FindFirstChild("Data") and nearestEnemy.Data:FindFirstChild("Health"))
-
-                    if not health or health.Value <= 0 then
-                        break
-                    end
+                while nearestEnemy.Parent 
+                      and getgenv().autoAttackTP do
 
                     clickRemote:FireServer()
-                    task.wait(0.2)
+                    task.wait(0.1)
                 end
+
+                print("Inimigo morreu")
 
             end)
 
-            task.wait(0.4)
+            task.wait(0.1)
         end
     end)
 end
@@ -786,9 +768,6 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
-
-
-
 
 
 
