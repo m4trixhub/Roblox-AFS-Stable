@@ -242,71 +242,63 @@ function autoAttackTP()
                 local clickRemote = game.ReplicatedStorage.Remote:WaitForChild("ClickerDamage")
 
                 --------------------------------------------------
-                -- ENCONTRA O INIMIGO MAIS PRÓXIMO
+                -- PEGA O INIMIGO MAIS PRÓXIMO (SEM HUMANOID)
                 --------------------------------------------------
                 local nearestEnemy = nil
                 local shortestDistance = math.huge
 
                 for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                    if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") then
-                        if enemy.Humanoid.Health > 0 then
-                            local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
-                            if distance < shortestDistance then
-                                shortestDistance = distance
-                                nearestEnemy = enemy
-                            end
+                    if enemy:FindFirstChild("HumanoidRootPart") then
+                        local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
+
+                        if distance < shortestDistance then
+                            shortestDistance = distance
+                            nearestEnemy = enemy
                         end
                     end
                 end
 
                 if not nearestEnemy then
-                    print("Nenhum inimigo vivo encontrado")
+                    print("Nenhum inimigo encontrado")
                     return
                 end
 
                 print("Alvo selecionado:", nearestEnemy.Name)
 
                 --------------------------------------------------
-                -- TELEPORTA PARA ELE
+                -- TELEPORTA
                 --------------------------------------------------
                 hrp.CFrame = nearestEnemy.HumanoidRootPart.CFrame
 
                 --------------------------------------------------
-                -- ENVIA PETS UMA VEZ
+                -- ENVIA PETS
                 --------------------------------------------------
                 local contador = 1
                 for _, pet in ipairs(workspace.Pets:GetDescendants()) do
                     if pet:IsA("Model") and pet:FindFirstChild("Data") then
                         if tostring(pet.Data.Owner.Value) == player.Name then
-
-                            local args = {
-                                [1] = pet.Data.UID.Value,
-                                [2] = nearestEnemy,
-                                [3] = contador
-                            }
-
-                            print("Enviando pet:", pet.Name)
-                            sendPet:FireServer(unpack(args))
+                            sendPet:FireServer(
+                                pet.Data.UID.Value,
+                                nearestEnemy,
+                                contador
+                            )
                             contador += 1
                         end
                     end
                 end
 
                 --------------------------------------------------
-                -- LOOP ATÉ O INIMIGO MORRER
+                -- LOOP ATÉ ELE SUMIR (MORTE)
                 --------------------------------------------------
-                while nearestEnemy 
-                      and nearestEnemy:FindFirstChild("Humanoid") 
-                      and nearestEnemy.Humanoid.Health > 0 
+                while nearestEnemy.Parent 
+                      and enemiesFolder:FindFirstChild(nearestEnemy.Name) 
                       and getgenv().autoAttackTP do
 
-                    -- CLICK DAMAGE
                     clickRemote:FireServer()
-
                     task.wait(0.2)
                 end
 
-                print("Inimigo morreu, buscando próximo...")
+                print("Inimigo morreu ou sumiu")
 
             end)
 
@@ -770,6 +762,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
