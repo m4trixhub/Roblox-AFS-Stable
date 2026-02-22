@@ -169,49 +169,71 @@ function searchEnemies()
     end)
 end
 
--- AUTO ATTACK 
+-- Função de busca otimizada para o inimigo mais próximo
+local function getClosestEnemy()
+    local closest = nil
+    local dist = math.huge
+    local playerPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
+    
+    if not playerPos then return nil end
+
+    local enemiesFolder = workspace.Worlds[player.World.Value]:FindFirstChild("Enemies")
+    if enemiesFolder then
+        for _, v in ipairs(enemiesFolder:GetChildren()) do
+            if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("PrimaryPart") then
+                local magnitude = (v.HumanoidRootPart.Position - playerPos).Magnitude
+                if magnitude < dist then
+                    dist = magnitude
+                    closest = v
+                end
+            end
+        end
+    end
+    return closest
+end
+
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
+            task.wait()
             pcall(function()
-                local player = game.Players.LocalPlayer
-                local currentWorld = player.World.Value
-                local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
-                local playerPosition = player.Character.HumanoidRootPart.Position
-
-                local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
-                local petList = game.Workspace.Pets:GetChildren()
+                local target = getClosestEnemy()
                 
-                for _, enemy in ipairs(enemies) do
-                    local enemyPosition = enemy.HumanoidRootPart.Position
-                    local distance = (enemyPosition - playerPosition).Magnitude
-
-                    if distance < 200 then
-                        player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
-                        local contador = 1
-                        print('SENDING PETS TO ATTACK...')
-
-                        for _, pet in ipairs(petList) do
-                            task.wait()
-                            if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
-                                local args = {
-                                    [1] = pet,
-                                    [2] = enemy,
-                                    [3] = contador
-                                }
-                                sendPetRemote:FireServer(unpack(args))
-                                pet.Data.Attacking.Value = args[2]
-                                contador = contador + 1
+                if target then
+                    -- 1. Trava o Personagem no Inimigo (Ancorado para evitar drift)
+                    player.Character.PrimaryPart.CFrame = target.PrimaryPart.CFrame * CFrame.new(0, 0, 3)
+                    player.Character.PrimaryPart.Anchored = true
+                    
+                    -- 2. Ativa o Clique de Dano (Mesma lógica do Gamepass/Remote)
+                    game:GetService("ReplicatedStorage").Remote.ClickerDamage:FireServer()
+                    
+                    -- 3. Envia os Pets
+                    local petList = game.Workspace.Pets:GetChildren()
+                    local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+                    local contador = 1
+                    
+                    for _, pet in ipairs(petList) do
+                        if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                            -- Só envia se o pet não estiver atacando ou se o alvo for diferente
+                            if pet.Data.Attacking.Value ~= target then
+                                sendPetRemote:FireServer(pet, target, contador)
+                                pet.Data.Attacking.Value = target
                             end
+                            contador = contador + 1
                         end
                     end
-                    task.wait()
+                else
+                    -- Se não houver inimigo, solta o player
+                    player.Character.PrimaryPart.Anchored = false
                 end
             end)
         end
+        -- Garante que o player desancore ao desligar o toggle
+        if player.Character and player.Character:FindFirstChild("PrimaryPart") then
+            player.Character.PrimaryPart.Anchored = false
+        end
     end)
 end
-
 
 
 
@@ -669,4 +691,5 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
