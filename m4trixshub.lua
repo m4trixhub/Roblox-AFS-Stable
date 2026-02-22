@@ -228,103 +228,89 @@ end
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
-            print("AutoAttack loop rodando...")
-
             pcall(function()
+
                 local player = game.Players.LocalPlayer
-                if not player.Character then
-                    print("Character não encontrado")
-                    return
-                end
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then
-                    print("HumanoidRootPart não encontrado")
-                    return
-                end
+                local hrp = player.Character.HumanoidRootPart
+                local currentWorld = player.World.Value
+                local enemiesFolder = workspace.Worlds[currentWorld]:FindFirstChild("Enemies")
+                if not enemiesFolder then return end
 
-                local currentWorld = player:FindFirstChild("World")
-                if not currentWorld then
-                    print("World value não encontrado")
-                    return
-                end
+                local sendPet = game.ReplicatedStorage.Remote:WaitForChild("SendPet")
+                local clickRemote = game.ReplicatedStorage.Remote:WaitForChild("ClickerDamage")
 
-                print("World atual:", currentWorld.Value)
+                --------------------------------------------------
+                -- ENCONTRA O INIMIGO MAIS PRÓXIMO
+                --------------------------------------------------
+                local nearestEnemy = nil
+                local shortestDistance = math.huge
 
-                local worldFolder = workspace:FindFirstChild("Worlds")
-                if not worldFolder then
-                    print("Workspace.Worlds não encontrado")
-                    return
-                end
-
-                local enemiesFolder = worldFolder[currentWorld.Value]:FindFirstChild("Enemies")
-                if not enemiesFolder then
-                    print("Enemies folder não encontrado")
-                    return
-                end
-
-                local enemies = enemiesFolder:GetChildren()
-                print("Inimigos encontrados:", #enemies)
-
-                local sendPet = game.ReplicatedStorage:WaitForChild("Remote"):FindFirstChild("SendPet")
-                if not sendPet then
-                    print("Remote SendPet não encontrado")
-                    return
-                end
-
-                local petsFolder = workspace:FindFirstChild("Pets")
-                if not petsFolder then
-                    print("Workspace.Pets não encontrado")
-                    return
-                end
-
-                local ownedPets = 0
-
-                for _, pet in ipairs(petsFolder:GetDescendants()) do
-                    if pet:IsA("Model") and pet:FindFirstChild("Data") then
-                        if tostring(pet.Data.Owner.Value) == player.Name then
-                            ownedPets += 1
-                        end
-                    end
-                end
-
-                print("Pets do jogador encontrados:", ownedPets)
-
-                for _, enemy in ipairs(enemies) do
-                    if enemy:FindFirstChild("HumanoidRootPart") then
-                        local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
-                        print("Distância até", enemy.Name, "=", distance)
-
-                        if distance < 200 then
-                            print("Teleportando para:", enemy.Name)
-                            hrp.CFrame = enemy.HumanoidRootPart.CFrame
-
-                            local contador = 1
-
-                            for _, pet in ipairs(petsFolder:GetDescendants()) do
-                                if pet:IsA("Model") and pet:FindFirstChild("Data") then
-                                    if tostring(pet.Data.Owner.Value) == player.Name then
-                                        print("Enviando pet UID:", pet.Data.UID.Value)
-
-                                        local args = {
-                                            [1] = pet.Data.UID.Value,
-                                            [2] = enemy,
-                                            [3] = contador
-                                        }
-
-                                        sendPet:FireServer(unpack(args))
-                                        contador += 1
-                                    end
-                                end
+                for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                    if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") then
+                        if enemy.Humanoid.Health > 0 then
+                            local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                nearestEnemy = enemy
                             end
                         end
-                    else
-                        print(enemy.Name, "não tem HumanoidRootPart")
                     end
                 end
+
+                if not nearestEnemy then
+                    print("Nenhum inimigo vivo encontrado")
+                    return
+                end
+
+                print("Alvo selecionado:", nearestEnemy.Name)
+
+                --------------------------------------------------
+                -- TELEPORTA PARA ELE
+                --------------------------------------------------
+                hrp.CFrame = nearestEnemy.HumanoidRootPart.CFrame
+
+                --------------------------------------------------
+                -- ENVIA PETS UMA VEZ
+                --------------------------------------------------
+                local contador = 1
+                for _, pet in ipairs(workspace.Pets:GetDescendants()) do
+                    if pet:IsA("Model") and pet:FindFirstChild("Data") then
+                        if tostring(pet.Data.Owner.Value) == player.Name then
+
+                            local args = {
+                                [1] = pet.Data.UID.Value,
+                                [2] = nearestEnemy,
+                                [3] = contador
+                            }
+
+                            print("Enviando pet:", pet.Name)
+                            sendPet:FireServer(unpack(args))
+                            contador += 1
+                        end
+                    end
+                end
+
+                --------------------------------------------------
+                -- LOOP ATÉ O INIMIGO MORRER
+                --------------------------------------------------
+                while nearestEnemy 
+                      and nearestEnemy:FindFirstChild("Humanoid") 
+                      and nearestEnemy.Humanoid.Health > 0 
+                      and getgenv().autoAttackTP do
+
+                    -- CLICK DAMAGE
+                    clickRemote:FireServer()
+
+                    task.wait(0.2)
+                end
+
+                print("Inimigo morreu, buscando próximo...")
+
             end)
 
-            task.wait(1)
+            task.wait(0.5)
         end
     end)
 end
@@ -784,6 +770,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
