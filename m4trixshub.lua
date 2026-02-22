@@ -135,7 +135,7 @@ end
 function autoClickGP()
 	spawn(function()
 		while getgenv().autoClickGP do
-            task.wait(0.1)
+            task.wait()
 			local Event = game:GetService("ReplicatedStorage").Remote.ClickerDamage
 			Event:FireServer()
 		end
@@ -301,14 +301,14 @@ function autoAttackTP()
                       and getgenv().autoAttackTP do
 
                     clickRemote:FireServer()
-                    task.wait(0.1)
+                    task.wait()
                 end
 
                 print("Inimigo morreu")
 
             end)
 
-            task.wait(0.1)
+            task.wait()
         end
     end)
 end
@@ -768,6 +768,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
