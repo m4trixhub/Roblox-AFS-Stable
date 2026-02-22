@@ -337,7 +337,7 @@ function autoAttackExtra()
             if nearestEnemy then
                 local enemyPosition = nearestEnemy.HumanoidRootPart.Position
                 local distance = (enemyPosition - playerPosition).Magnitude
-                if distance < 200 then
+                if distance < 150 then
                     player.Character.HumanoidRootPart.CFrame = nearestEnemy.PrimaryPart.CFrame 
                     local contador = 1
                     print('SENDING PETS TO ATTACK...')
@@ -768,6 +768,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
