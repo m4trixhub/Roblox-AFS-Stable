@@ -228,41 +228,61 @@ end
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
-            -- Aumentei levemente o wait. Se for rápido demais (0.01), o servidor ignora por "Spam"
-            task.wait(0.05) 
-            
-            pcall(function()
-                local target = getAnyClosestEnemy()
-                local char = player.Character
-                
-                if target and char and char:FindFirstChild("HumanoidRootPart") then
-                    local root = char.HumanoidRootPart
-                    local targetRoot = target:FindFirstChild("HumanoidRootPart") or target:FindFirstChild("PrimaryPart")
+            task.wait(0.1)
 
-                    -- 1. POSICIONAMENTO (Fundamental para o dano contar)
-                    -- Tentaremos ficar EXATAMENTE na posição do bicho, mas sem travar o físico
-                    root.CFrame = targetRoot.CFrame
-                    
-                    -- 2. CLICKER DAMAGE (Chamada tripla para garantir registro)
-                    local remote = game:GetService("ReplicatedStorage").Remote.ClickerDamage
-                    remote:FireServer()
-                    
-                    -- 3. ATAQUE DOS PETS (Estrutura de validação)
-                    local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
-                    local myPets = workspace.Pets:GetChildren()
-                    
+            pcall(function()
+                local char = player.Character
+                if not char then return end
+
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local currentWorld = player.World.Value
+                local worldFolder = workspace.Worlds:FindFirstChild(currentWorld)
+                if not worldFolder then return end
+
+                local enemiesFolder = worldFolder:FindFirstChild("Enemies")
+                if not enemiesFolder then return end
+
+                local closest = nil
+                local shortestDistance = 250
+
+                for _, enemy in ipairs(enemiesFolder:GetChildren()) do
+                    if enemy:IsA("Model") and enemy:FindFirstChild("HumanoidRootPart") then
+                        local health =
+                            enemy:FindFirstChild("Health")
+                            or (enemy:FindFirstChild("Data") and enemy.Data:FindFirstChild("Health"))
+
+                        if health and health.Value > 0 then
+                            local distance = (enemy.HumanoidRootPart.Position - root.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closest = enemy
+                            end
+                        end
+                    end
+                end
+
+                if closest then
+                    local targetRoot = closest:FindFirstChild("HumanoidRootPart")
+                    if not targetRoot then return end
+
+                    -- Fica levemente atrás do inimigo (não dentro)
+                    root.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -3)
+
+                    -- Click damage
+                    game:GetService("ReplicatedStorage").Remote.ClickerDamage:FireServer()
+
+                    -- Enviar pets
+                    local sendPet = game:GetService("ReplicatedStorage").Remote.SendPet
                     local contador = 1
-                    for _, pet in ipairs(myPets) do
+
+                    for _, pet in ipairs(workspace.Pets:GetChildren()) do
                         if pet:IsA("Model") and pet:FindFirstChild("Data") then
                             if tostring(pet.Data.Owner.Value) == player.Name then
-                                -- Algumas engines ignoram se o target não for o Objeto exato
-                                -- Se o bicho estiver no NIL, o servidor pode rejeitar se o ID não bater
-                                sendPetRemote:FireServer(pet, target, contador)
-                                
-                                if pet.Data:FindFirstChild("Attacking") then
-                                    pet.Data.Attacking.Value = target
-                                end
-                                contador = contador + 1
+                                sendPet:FireServer(pet, closest, contador)
+                                contador += 1
+                                task.wait(0.05)
                             end
                         end
                     end
@@ -727,5 +747,6 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
