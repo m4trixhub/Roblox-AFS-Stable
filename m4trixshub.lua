@@ -225,15 +225,24 @@ local function getAnyClosestEnemy()
     return closest
 end
 
+local function GetNil(Name, DebugId)
+    for _, Object in getnilinstances() do
+        if Object.Name == Name and Object:GetDebugId() == DebugId then
+            return Object
+        end
+    end
+end
+
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
             pcall(function()
 
                 local player = game.Players.LocalPlayer
-                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                if not player.Character then return end
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
 
-                local hrp = player.Character.HumanoidRootPart
                 local currentWorld = player.World.Value
                 local enemiesFolder = workspace.Worlds[currentWorld]:FindFirstChild("Enemies")
                 if not enemiesFolder then return end
@@ -257,12 +266,7 @@ function autoAttackTP()
                     end
                 end
 
-                if not nearestEnemy then
-                    print("Nenhum inimigo encontrado")
-                    return
-                end
-
-                print("Alvo:", nearestEnemy.Name)
+                if not nearestEnemy then return end
 
                 --------------------------------------------------
                 -- TELEPORTA
@@ -270,22 +274,33 @@ function autoAttackTP()
                 hrp.CFrame = nearestEnemy.HumanoidRootPart.CFrame
 
                 --------------------------------------------------
-                -- PEGA PETS REAIS (MODELS)
+                -- PEGA INIMIGO REAL (NIL)
+                --------------------------------------------------
+                local realEnemy = GetNil(
+                    nearestEnemy.Name,
+                    nearestEnemy:GetDebugId()
+                )
+
+                if not realEnemy then
+                    print("Inimigo real não encontrado")
+                    return
+                end
+
+                --------------------------------------------------
+                -- ENVIA PETS
                 --------------------------------------------------
                 local petsFolder = workspace:FindFirstChild("Pets")
                 if not petsFolder then return end
 
                 local contador = 1
 
-                for _, pet in ipairs(petsFolder:GetChildren()) do
+                for _, pet in ipairs(petsFolder:GetDescendants()) do
                     if pet:IsA("Model") and pet:FindFirstChild("Data") then
                         if tostring(pet.Data.Owner.Value) == player.Name then
 
-                            print("Enviando pet:", pet.Name)
-
                             sendPet:FireServer(
                                 pet,
-                                nearestEnemy,
+                                realEnemy,
                                 contador
                             )
 
@@ -295,16 +310,12 @@ function autoAttackTP()
                 end
 
                 --------------------------------------------------
-                -- ESPERA MORRER
+                -- CLICA ATÉ MORRER
                 --------------------------------------------------
-                while nearestEnemy.Parent 
-                      and getgenv().autoAttackTP do
-
+                while nearestEnemy.Parent and getgenv().autoAttackTP do
                     clickRemote:FireServer()
                     task.wait(0.2)
                 end
-
-                print("Inimigo morreu")
 
             end)
 
@@ -312,7 +323,6 @@ function autoAttackTP()
         end
     end)
 end
-
 
 
 
@@ -768,6 +778,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
