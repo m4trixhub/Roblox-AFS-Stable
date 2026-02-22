@@ -231,39 +231,38 @@ function autoAttackTP()
             pcall(function()
 
                 local player = game.Players.LocalPlayer
-                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                if not player.Character then return end
+                if not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
                 local hrp = player.Character.HumanoidRootPart
-                local currentWorld = player.World.Value
-                local enemiesFolder = workspace.Worlds[currentWorld]:FindFirstChild("Enemies")
-                if not enemiesFolder then return end
-
                 local sendPet = game.ReplicatedStorage.Remote:WaitForChild("SendPet")
                 local clickRemote = game.ReplicatedStorage.Remote:WaitForChild("ClickerDamage")
 
                 --------------------------------------------------
-                -- PEGA O INIMIGO MAIS PRÓXIMO (SEM HUMANOID)
+                -- ACHA INIMIGO MAIS PRÓXIMO VIA DESCENDANTS
                 --------------------------------------------------
                 local nearestEnemy = nil
                 local shortestDistance = math.huge
 
-                for _, enemy in ipairs(enemiesFolder:GetChildren()) do
-                    if enemy:FindFirstChild("HumanoidRootPart") then
-                        local distance = (enemy.HumanoidRootPart.Position - hrp.Position).Magnitude
-
-                        if distance < shortestDistance then
-                            shortestDistance = distance
-                            nearestEnemy = enemy
+                for _, v in pairs(workspace.Worlds:GetDescendants()) do
+                    if v:IsA("Humanoid") and v.Health > 0 then
+                        local enemyModel = v.Parent
+                        if enemyModel:FindFirstChild("HumanoidRootPart") then
+                            local distance = (enemyModel.HumanoidRootPart.Position - hrp.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                nearestEnemy = enemyModel
+                            end
                         end
                     end
                 end
 
                 if not nearestEnemy then
-                    print("Nenhum inimigo encontrado")
+                    print("Nenhum inimigo vivo encontrado")
                     return
                 end
 
-                print("Alvo selecionado:", nearestEnemy.Name)
+                print("Alvo:", nearestEnemy.Name)
 
                 --------------------------------------------------
                 -- TELEPORTA
@@ -271,7 +270,7 @@ function autoAttackTP()
                 hrp.CFrame = nearestEnemy.HumanoidRootPart.CFrame
 
                 --------------------------------------------------
-                -- ENVIA PETS
+                -- ENVIA PETS UMA VEZ
                 --------------------------------------------------
                 local contador = 1
                 for _, pet in ipairs(workspace.Pets:GetDescendants()) do
@@ -288,17 +287,18 @@ function autoAttackTP()
                 end
 
                 --------------------------------------------------
-                -- LOOP ATÉ ELE SUMIR (MORTE)
+                -- ESPERA MORRER
                 --------------------------------------------------
-                while nearestEnemy.Parent 
-                      and enemiesFolder:FindFirstChild(nearestEnemy.Name) 
+                while nearestEnemy
+                      and nearestEnemy:FindFirstChild("Humanoid")
+                      and nearestEnemy.Humanoid.Health > 0
                       and getgenv().autoAttackTP do
 
                     clickRemote:FireServer()
                     task.wait(0.2)
                 end
 
-                print("Inimigo morreu ou sumiu")
+                print("Inimigo morreu")
 
             end)
 
@@ -762,6 +762,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
