@@ -229,57 +229,46 @@ function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
             pcall(function()
-                local player = game:GetService("Players").LocalPlayer
-                local currentWorld = player.World.Value
-                
-                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-                    return
-                end
+                local player = game.Players.LocalPlayer
+                if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
 
-                local playerHRP = player.Character.HumanoidRootPart
+                local currentWorld = player.World.Value
                 local enemiesFolder = workspace.Worlds[currentWorld]:FindFirstChild("Enemies")
                 if not enemiesFolder then return end
 
-                -- PEGA APENAS OS PETS DO PLAYER
-                local petFolder = workspace:FindFirstChild("Pets")
-                if not petFolder then return end
-
-                petFolder = petFolder:FindFirstChild(player.Name)
-                if not petFolder then return end
-
-                local sendPetRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("SendPet")
+                local sendPet = game.ReplicatedStorage.Remote:WaitForChild("SendPet")
+                local playerHRP = player.Character.HumanoidRootPart
 
                 for _, enemy in ipairs(enemiesFolder:GetChildren()) do
                     if enemy:FindFirstChild("HumanoidRootPart") then
                         local distance = (enemy.HumanoidRootPart.Position - playerHRP.Position).Magnitude
 
                         if distance < 200 then
-                            -- TELEPORTA CORRETAMENTE
                             playerHRP.CFrame = enemy.HumanoidRootPart.CFrame
 
                             local contador = 1
 
-                            for _, pet in ipairs(petFolder:GetChildren()) do
+                            for _, pet in ipairs(workspace.Pets:GetDescendants()) do
                                 if pet:IsA("Model") and pet:FindFirstChild("Data") then
                                     if tostring(pet.Data.Owner.Value) == player.Name then
+                                        
                                         local args = {
-                                            [1] = pet,
+                                            [1] = pet.Data.UID.Value,
                                             [2] = enemy,
                                             [3] = contador
                                         }
 
-                                        sendPetRemote:FireServer(unpack(args))
-                                        pet.Data.Attacking.Value = enemy
+                                        sendPet:FireServer(unpack(args))
                                         contador += 1
                                     end
                                 end
                             end
                         end
                     end
-                    task.wait()
                 end
             end)
-            task.wait()
+
+            task.wait(0.5)
         end
     end)
 end
@@ -739,6 +728,7 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
 
 
