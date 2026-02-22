@@ -228,7 +228,8 @@ end
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
-            task.wait(0.01) -- Velocidade máxima de resposta
+            -- Aumentei levemente o wait. Se for rápido demais (0.01), o servidor ignora por "Spam"
+            task.wait(0.05) 
             
             pcall(function()
                 local target = getAnyClosestEnemy()
@@ -238,41 +239,38 @@ function autoAttackTP()
                     local root = char.HumanoidRootPart
                     local targetRoot = target:FindFirstChild("HumanoidRootPart") or target:FindFirstChild("PrimaryPart")
 
-                    -- 1. TELEPORT (Cola no inimigo)
-                    root.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
-
-                    -- 2. AUTO CLICK SIMULTÂNEO
-                    -- Dispara o remote de dano de clique junto com o ataque do pet
-                    game:GetService("ReplicatedStorage").Remote.ClickerDamage:FireServer()
-
-                    -- 3. ATAQUE DOS PETS
+                    -- 1. POSICIONAMENTO (Fundamental para o dano contar)
+                    -- Tentaremos ficar EXATAMENTE na posição do bicho, mas sem travar o físico
+                    root.CFrame = targetRoot.CFrame
+                    
+                    -- 2. CLICKER DAMAGE (Chamada tripla para garantir registro)
+                    local remote = game:GetService("ReplicatedStorage").Remote.ClickerDamage
+                    remote:FireServer()
+                    
+                    -- 3. ATAQUE DOS PETS (Estrutura de validação)
                     local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
                     local myPets = workspace.Pets:GetChildren()
                     
-                    for i, pet in ipairs(myPets) do
+                    local contador = 1
+                    for _, pet in ipairs(myPets) do
                         if pet:IsA("Model") and pet:FindFirstChild("Data") then
                             if tostring(pet.Data.Owner.Value) == player.Name then
-                                -- Usa a estrutura exata do seu exemplo, mas dinâmica
-                                sendPetRemote:FireServer(pet, target, i)
+                                -- Algumas engines ignoram se o target não for o Objeto exato
+                                -- Se o bicho estiver no NIL, o servidor pode rejeitar se o ID não bater
+                                sendPetRemote:FireServer(pet, target, contador)
                                 
-                                -- Atualiza o valor de ataque para o Pet não ficar ocioso
                                 if pet.Data:FindFirstChild("Attacking") then
                                     pet.Data.Attacking.Value = target
                                 end
+                                contador = contador + 1
                             end
                         end
                     end
                 end
             end)
         end
-        
-        -- Resetar ao desligar
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.Anchored = false
-        end
     end)
 end
-
 
 
 
@@ -729,4 +727,5 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
+
 
