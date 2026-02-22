@@ -169,93 +169,49 @@ function searchEnemies()
     end)
 end
 
--- Função de busca revisada (mais robusta)
-local function getClosestEnemy()
-    local closest = nil
-    local dist = 500 -- Distância máxima para procurar
-    local char = player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return nil end
-    
-    local playerPos = char.HumanoidRootPart.Position
-    local worldName = player.World.Value
-    
-    -- Verifica se a pasta do mundo e de inimigos existe
-    local worldFolder = workspace.Worlds:FindFirstChild(worldName)
-    if not worldFolder then return nil end
-    
-    local enemiesFolder = worldFolder:FindFirstChild("Enemies")
-    if not enemiesFolder then return nil end
-
-    for _, v in ipairs(enemiesFolder:GetChildren()) do
-        -- Verifica se o inimigo está vivo e tem as partes necessárias
-        if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("PrimaryPart") then
-            -- Se o jogo tiver sistema de vida, você pode adicionar: if v.Health.Value > 0 then
-            local magnitude = (v.HumanoidRootPart.Position - playerPos).Magnitude
-            if magnitude < dist then
-                dist = magnitude
-                closest = v
-            end
-        end
-    end
-    return closest
-end
-
+-- AUTO ATTACK 
 function autoAttackTP()
     spawn(function()
         while getgenv().autoAttackTP do
-            task.wait(0.05) -- Delay leve para não crashar o processamento
-            
-            local success, err = pcall(function()
-                local target = getClosestEnemy()
-                local char = player.Character
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local currentWorld = player.World.Value
+                local enemies = workspace.Worlds[currentWorld].Enemies:GetChildren()
+                local playerPosition = player.Character.HumanoidRootPart.Position
+
+                local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+                local petList = game.Workspace.Pets:GetChildren()
                 
-                if target and char and char:FindFirstChild("PrimaryPart") then
-                    -- 1. Teleport e "Grudar" no inimigo
-                    -- Offset de 3 studs para frente para não ficar dentro do modelo
-                    char.PrimaryPart.CFrame = target.PrimaryPart.CFrame * CFrame.new(0, 0, 3)
-                    
-                    -- 2. Clicker Damage (Auto Click embutido no farm)
-                    game:GetService("ReplicatedStorage").Remote.ClickerDamage:FireServer()
-                    
-                    -- 3. Enviar Pets
-                    local petsFolder = workspace:FindFirstChild("Pets")
-                    if petsFolder then
-                        local sendPetRemote = game:GetService("ReplicatedStorage").Remote.SendPet
+                for _, enemy in ipairs(enemies) do
+                    local enemyPosition = enemy.HumanoidRootPart.Position
+                    local distance = (enemyPosition - playerPosition).Magnitude
+
+                    if distance < 200 then
+                        player.Character.HumanoidRootPart.CFrame = enemy.PrimaryPart.CFrame
                         local contador = 1
-                        
-                        for _, pet in ipairs(petsFolder:GetChildren()) do
-                            if pet:IsA("Model") and pet:FindFirstChild("Data") then
-                                if tostring(pet.Data.Owner.Value) == player.Name then
-                                    -- Envia o comando de ataque
-                                    sendPetRemote:FireServer(pet, target, contador)
-                                    -- Atualiza o valor interno para o pet saber que está ocupado
-                                    if pet.Data:FindFirstChild("Attacking") then
-                                        pet.Data.Attacking.Value = target
-                                    end
-                                    contador = contador + 1
-                                end
+                        print('SENDING PETS TO ATTACK...')
+
+                        for _, pet in ipairs(petList) do
+                            task.wait()
+                            if pet:IsA("Model") and pet:FindFirstChild("Data") and tostring(pet.Data.Owner.Value) == player.Name then
+                                local args = {
+                                    [1] = pet,
+                                    [2] = enemy,
+                                    [3] = contador
+                                }
+                                sendPetRemote:FireServer(unpack(args))
+                                pet.Data.Attacking.Value = args[2]
+                                contador = contador + 1
                             end
                         end
                     end
-                else
-                    -- Se não achar ninguém, garante que não está travado
-                    if char and char:FindFirstChild("PrimaryPart") then
-                        -- Opcional: char.PrimaryPart.Anchored = false
-                    end
+                    task.wait()
                 end
             end)
-            
-            if not success then
-                print("Erro no AutoAttack: ", err)
-            end
-        end
-        
-        -- Ao desligar o Toggle, garante que o player pode se mexer
-        if player.Character and player.Character:FindFirstChild("PrimaryPart") then
-            player.Character.PrimaryPart.Anchored = false
         end
     end)
 end
+
 
 
 
@@ -713,6 +669,3 @@ end)
 Section:NewButton("Teleport to Saved Position", "Teleport Position", function()
     teleportToSavedPosition()
 end)
-
-
-
